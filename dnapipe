@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
 set -o pipefail
-set -x
 
 ################################################################
 # Program: hDNApipe
@@ -570,11 +569,6 @@ other option:
     elif [ $seq_method != "wgs" ] && [ "$cnv_flag" == "True" ] && [ "$delly_cnv_flag" == "True" ]; then
         echo -e "Error: CNV calling of WES or target data is only supported by CNVkit.\n"
         exit 1
-    # elif [ "$strelka_flag" == "True" ] && [ $sample_num -gt 10 ]; then
-    #     echo -e "Warning: The group analysis in Strelka is not recommanded for more than 10 samples.\n"
-    #     exit 1
-    # elif [ "$manta_flag" == "True" ] && [ $sample_num -gt 10 ]; then
-    #     echo -e "Warning: The group analysis in Manta is not recommanded for more than 10 samples.\n"
     fi
 
     temp_dir=$out_dir/temp
@@ -583,7 +577,7 @@ other option:
     # Align and preprocess
     while IFS=',' read -r name input1 input2 condition sex; do
         RG="@RG\tID:unknown\tPL:unknown\tLB:unknown\tSM:$name"
-        # bash $dnapipe_dir/scripts/align_pre.sh "$file_type" "$input1" "$input2" "$threads" "$memory_per" "$out_dir" "$RG" "$rm_dup" "$sup_clip" "$mapq_min" "$force_rg"
+        bash $dnapipe_dir/scripts/align_pre.sh "$file_type" "$input1" "$input2" "$threads" "$memory_per" "$out_dir" "$RG" "$rm_dup" "$sup_clip" "$mapq_min" "$force_rg"
     done < $sample_table
 
     # Call SNP/INDEL
@@ -592,12 +586,16 @@ other option:
     # run GATK
     if [ "$gatk_flag" == "True" ]; then
         bash $dnapipe_dir/scripts/gatk.sh $dect_mode $seq_method $sample_table $out_dir $region
+        if [ $dect_mode == "somatic" ]; then
+            sed -i 's/|/\//g' $out_dir/gatk/snv_gatk.vcf
+            sed -i 's/|/\//g' $out_dir/gatk/indel_gatk.vcf
+        fi
         echo "$out_dir/gatk/snv_gatk.vcf" >> $vcf_list
         echo "$out_dir/gatk/indel_gatk.vcf" >> $vcf_list
     fi
     # run strelka for SNP/INDEL
     if [ "$strelka_flag" == "True" ]; then
-        # bash $dnapipe_dir/scripts/strelka.sh $dect_mode $seq_method $sample_table $out_dir $threads "$region"
+        bash $dnapipe_dir/scripts/strelka.sh $dect_mode $seq_method $sample_table $out_dir $threads "$region"
         echo "$out_dir/strelka/snv_strelka.vcf" >> $vcf_list
         echo "$out_dir/strelka/indel_strelka.vcf" >> $vcf_list
     fi
@@ -614,7 +612,7 @@ other option:
         echo "$out_dir/delly/sv_delly.vcf" >> $vcf_list
     fi
     if [ "$manta_flag" == "True" ]; then
-        # bash $dnapipe_dir/scripts/manta.sh $dect_mode $seq_method $sample_table $out_dir $threads "$region"
+        bash $dnapipe_dir/scripts/manta.sh $dect_mode $seq_method $sample_table $out_dir $threads "$region"
         echo "$out_dir/manta/sv_manta.vcf" >> $vcf_list
     fi
     if [ "$lumpy_flag" == "True" ]; then
@@ -643,9 +641,12 @@ other option:
     # Annotate
     if [ "$annot_flag" == "True" ]; then
         cat $vcf_list | while read vcf; do
+            echo "Annotating $vcf ..."
             bash $dnapipe_dir/scripts/annotate.sh $vcf $out_dir $threads $annot_para
         done
     fi
+
+    echo "============= Variant annotation done ============="
 
 }
 
@@ -771,7 +772,7 @@ Additional Options:
 
     source $config
     cat $ref.fai | cut -f 1,2 | head -n 24 > $out_dir/chr_len.txt
-    conda run -n $env_dnapipe_py3 Rscript \
+    conda run -n $dnapipe_env_py3 Rscript \
         $dnapipe_dir/scripts/visual.R $category $length $pathogenicity $circos $go $kegg $ppi $out_dir $SNP $INDEL $SV $CNV $bin $cadd_score
 }
 
