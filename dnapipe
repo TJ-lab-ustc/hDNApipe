@@ -1,0 +1,823 @@
+#!/bin/bash
+set -e
+set -o pipefail
+set -x
+
+################################################################
+# Program: hDNApipe
+# Version: 1.0
+# Author: Zhang Yaxin (zhangyaxin@mail.ustc.edu.cn)
+#################################################################
+
+#################################################################
+# Script structure:
+# 1. Global usage
+# 2. Environment initiation
+# 3. Set reference genome
+# 4. Variant calling module
+# 5. Plot module
+#################################################################
+
+
+## 1. Global usage
+function usage() {
+    echo "
+Program: hDNApipe
+Version: 1.0
+Author: Zhang Yaxin (zhangyaxin@mail.ustc.edu.cn)
+
+usage:  dnapipe <command> [options]
+
+command: init   Automatically configure the environment. It can be skipped if manual configuration is completed.
+         ref    Select a reference genome from an existing file or automatically download it. 
+                An automatic indexing will be performed if related files are not found.
+         var    Run several variant calling pipelines from a clean fastq file or bam file. 
+         plot   Plot additional statistics and analysis graphs.
+
+options: 
+        -h       show this message
+"
+}
+
+
+## 2. Enviroment initiation
+function init() {
+
+    function init_usage() {
+        echo "
+usage:  dnapipe init --all [-o output_dir]
+    
+    It can be divided into two steps for software installation and data files download:
+        dnapipe init --tool [-o output_dir]
+        dnapipe init --data [-o output_dir]
+"
+    }
+    
+    # Check options passed in.
+    if [ -z "$1" ]; then
+	    init_usage
+	    exit 1
+    fi
+
+    # set defaults
+    out_dir=$PWD
+
+    # get options
+    VALID_ARGS=$(getopt -o "o:h" --longoptions "all,tool,data,help" -- "$@")
+    if [[ $? -ne 0 ]]; then
+        init_usage
+        exit 1;
+    fi
+    eval set -- "$VALID_ARGS"
+    while true; do
+        case "$1" in
+            -o)
+                out_dir=$(readlink -f $2)
+                shift 2
+            ;;
+            --all)
+                tool_flag="True"
+                data_flag="True"
+                shift
+            ;;
+            --tool)
+                tool_flag="True"
+                shift
+            ;;
+            --data)
+                data_flag="True"
+                shift
+            ;;
+            --help|-h)
+                init_usage
+                exit 1
+            ;;
+            --) shift; 
+                break
+            ;;
+        esac
+    done
+
+    echo "Initiating..."
+    download_dir=$out_dir/download
+    mkdir -p $download_dir
+    cd $download_dir
+
+    # Check config location and write home dir
+    if [ -f $config ]; then
+        sed -i "s|^dnapipe_dir=\".*\"|dnapipe_dir=\"$dnapipe_dir\"|" $config
+    else
+        echo -e "Error: Config not found. Should be in the same directory as current file."
+        exit 1
+    fi
+
+    # tools download
+    if [ "$tool_flag" == "True" ]; then
+        bash $dnapipe_dir/scripts/install_tools.sh $download_dir $dnapipe_dir
+    fi
+
+    # resource download
+    if [ "$data_flag" == "True" ]; then
+        bash $dnapipe_dir/scripts/download_resource.sh $download_dir $dnapipe_dir        
+    fi
+    
+    echo "**********Initiation Done**********"
+}
+
+# 3. Set reference genome
+function ref() {
+    function ref_usage() {
+        echo "
+usage:
+    If an existing file is set as the reference:
+        dnapipe ref --set <reference.fa>
+    Or if the reference needs to be downloaded online:
+        dnapipe ref --download <save_dir>
+"
+    }
+   
+    # check options passed in
+    if [ -z "$1" ]; then
+	    ref_usage
+	    exit 1
+    fi
+
+    # get options
+    VALID_ARGS=$(getopt -o "h" --longoptions "set:,download:,help" -- "$@")
+    if [[ $? -ne 0 ]]; then
+        ref_usage
+        exit 1;
+    fi
+
+    eval set -- "$VALID_ARGS"
+    while true; do
+        case "$1" in
+            --set)
+                ref_path=$2
+                shift 2
+            ;;
+            --download)
+                download_dir=$2
+                shift 2
+            ;;
+            --help|-h)
+                ref_usage
+                exit 1
+            ;;
+            --) shift; 
+                break
+            ;;
+        esac
+    done
+
+    ref_path=$(readlink -f $ref_path)
+    download_dir=$(readlink -f $download_dir)
+
+    # download hg38 if choose "download"
+    if [ -d "$download_dir" ] ; then
+        echo "**********Downloading hg38 reference...**********"
+        mkdir -p $download_dir/reference
+        hg38_dir=ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.15_GRCh38/seqs_for_alignment_pipelines.ucsc_ids
+        curl $hg38_dir/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.gz | \
+            gunzip > $download_dir/reference/GRCh38_no_alt_analysis_set.fna
+        curl $hg38_dir/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai \
+            > $download_dir/reference/GRCh38_no_alt_analysis_set.fna.fai
+        ref_path=$download_dir/reference/GRCh38_no_alt_analysis_set.fna
+        echo "**********Download Done**********"
+    else
+        echo "Error: Invalid directory."
+        exit 1
+    fi
+
+    # write reference path into config file in both options
+    if [ ! -f "$ref_path" ]; then
+        echo -e "Error: Invalid file \"$ref_path\"\n"
+        exit 1
+    fi
+    sed -i "s|^ref=\".*\"|ref=\"$ref_path\"|" $config
+
+    # index reference if no index file found
+    source $config
+    # samtools faidx
+    if [[ ! -f "$ref_path.fai" ]]; then
+        echo "**********Reference file not indexed with samtools. Indexing now...**********"  
+        conda run -n $dnapipe_env_py3 samtools faidx $ref_path
+        echo "**********Samtools faidx Done**********"
+    fi
+    # bwa index
+    if  [[ ! -f "$ref_path.amb" ]] || [[ ! -f "$ref_path.ann" ]] || [[ ! -f "$ref_path.bwt" ]] || [[ ! -f "$ref_path.pac" ]] || [[ ! -f "$ref_path.sa" ]]; then
+        echo "**********Reference file not indexed with BWA. Indexing now...**********"
+        conda run -n $dnapipe_env_py3 bwa index -a bwtsw $ref_path
+        echo "**********Bwa index Done**********"
+    fi
+
+    echo "**********Reference setting Done**********"
+}
+
+# 4. Variant calling module
+function var() {
+    function var_usage() {
+        echo "
+usage:   dnapipe var <core_options> [extra_options]
+
+Core options:
+        --mode/-M           Detection mode: "germline" or "somatic"
+        --seq-method/-s     Sequence method: "wgs" or "wes" (For the target, choose "wes"). 
+        --file-type/-f      Input sequencing file type: "fastq" or "bam"
+        --variant/-v        Variant type to call: "short" (refers to snv and indel), "cnv" or "sv". 
+                                (Use "," to link, such as "short,cnv,sv") 
+        --sample-info/-i    Provide sample informtion table.
+        --region/-r         Region to detect variants on. Bed file. Only necessary for wes/target data.
+
+Computing options:
+        -t threads  INT     Threads employed for multi-thread tasks (default: 1/2 of the total)
+        -m memory   INT     Set the maximum memory in G (default: 1/2 of the total)
+
+Align and preprocess:
+        --mapq/-Q   INT     Minimum map quality score for output (default: 30)
+        --remove-dup/-D     Remove duplicates rather than just marking them. (default: not used)
+        --soft-clip/-Y      Use soft clipping for supplementary alignments instead of hard clipping. (default: not used)
+        --force-rg          Force the addition or replacement of read group information. (default: not used)
+
+Variants calling:
+        --short   STR       Select SNP/Indel calling tools: "strelka", "deepvariant", "gatk".  (default:strelka)
+                                Note that "deepvariant" does NOT support "somatic".
+        --sv      STR       Select SV calling tools: "manta", "lumpy", "delly" (default: manta)
+        --cnv     STR       Select CNV calling tools: "cnvkit", "delly" (default:cnvkit)
+        --bin     INT       CNV calling bin size in bp (default: 1000 for wgs and 267 for wes)
+
+Annotation: (default: not use these options)
+        --annot             Use VEP to annotate SNP/INDEL vcf with default information and AnnotSV for SV/CNV
+                                ( VEP annotation includes: Gene in ENSG, Feature,Feature_type, Consequence, cDNA_position, 
+                                                            CDS_position, Protein_position, Amino_acids, Codons, IMPACT )
+    More VEP annotation information can be added:
+        --symbol            Add Gene Symbol information.
+        --exist             Check the existence of each variant.
+        --pathogenicity     Predict the pathogenicity of SNV and INDEL by SIFT, PolyPhen2, and CADD respectively.
+        --frequency         Add Population allele frequency.
+        --clinvar           Add Clinvar database annotation.
+    Reports:
+        --report            Generate reports for annotation results.
+    Else:
+        --annot-all         Use all the above options in annotation.
+
+other option:
+        -o  output directory (default: current working directory)
+        -h  show this message
+"
+    }
+
+    # check options passed in.
+    if [ -z "$1" ]; then
+	    var_usage
+	    exit 1
+    fi
+
+    # set defaults
+    out_dir=$PWD
+    total_threads=$(grep 'processor' /proc/cpuinfo | sort -u | wc -l)
+    total_memory=$(grep 'MemTotal' /proc/meminfo | awk '{print $2}')
+    threads=$(echo "$total_threads/2" | bc)
+    if [ $threads -lt 1 ]; then threads=1; fi
+    memory=$(echo "$total_memory/1024/1024/2" | bc)
+    mapq_min=30
+    short_tool="strelka"
+    sv_tool="manta"
+    cnv_tool="cnvkit"
+    annot_para=""
+
+    # import config
+    source $config
+    
+    # get options
+    VALID_ARGS=$(getopt -o "M:s:f:v:r:i:o:t:m:Q:DYh" --longoptions "mode:,seq-method:,file-type:,variant:,region:,sample-info:,mapq:,remove-dup,soft-clip,force-rg,short:,cnv:,sv:,bin:,annot,symbol,exist,frequency,clinvar,pathogenicity,report,annot-all,help" -- "$@")
+    if [[ $? -ne 0 ]]; then
+        var_usage
+        exit 1;
+    fi
+    eval set -- "$VALID_ARGS"
+    while true; do
+        case "$1" in
+            --mode|-M)
+                dect_mode=$2
+                shift 2
+            ;;
+            --seq-method|-s)
+                seq_method=$2
+                shift 2
+            ;;
+            --file-type|-f)
+                file_type=$2
+                shift 2
+            ;;
+            --variant|-v)
+                var_type=$2
+                shift 2
+            ;;
+            --region|-r)
+                region=$2
+                shift 2
+            ;;
+            --sample-info|-i)
+                sample_table=$2
+                shift 2
+            ;;
+            -o)
+                out_dir=$(readlink -f $2)
+                shift 2
+            ;;
+            -t)
+                threads=$2
+                shift 2
+            ;;
+            -m)
+                memory=$2
+                shift 2
+            ;;
+            --mapq|-Q)
+                mapq_min=$2
+                shift 2
+            ;;
+            --soft-clip|-Y)
+                sup_clip="True"
+                shift
+            ;;
+            --remove-dup|-D)
+                rm_dup="True"
+                shift
+            ;;
+            --force-rg)
+                force_rg="True"
+                shift
+            ;;
+            --short)
+                short_tool=$2
+                shift 2
+            ;;
+            --cnv)
+                cnv_tool=$2
+                shift 2
+            ;;
+            --sv)
+                sv_tool=$2
+                shift 2
+            ;;
+            --bin)
+                bin_size=$2
+                shift 2
+            ;;
+            --annot)
+                annot_flag="True"
+                shift
+            ;;
+            --symbol)
+                annot_para+="symbol "
+                shift
+            ;;
+            --exist)
+                annot_para+="exist "
+                shift
+            ;;
+            --frequency)
+                annot_para+="frequency "
+                shift
+            ;;
+            --clinvar)
+                annot_para+="clinvar "
+                shift
+            ;;
+            --pathogenicity)
+                annot_para+="pathogenicity "
+                shift
+            ;;
+            --report)
+                annot_para+="report "
+                shift
+            ;;
+            --annot-all)
+                annot_all_flag="True"
+                shift
+            ;;
+            --help|-h)
+                var_usage
+                exit 1
+		    ;;
+            --) shift; 
+                break
+            ;;
+        esac
+    done
+
+    if [ "$annot_all_flag" == "True" ]; then
+        annot_para="symbol exist pathogenicity frequency clinvar report"
+    fi
+    if [ "$annot_para" != "" ]; then
+        annot_flag="True"
+    fi
+
+    # Check options
+    # check core option
+    # required
+    if [ -z "$dect_mode" ] || [ -z "$seq_method" ] || [ -z "$file_type" ] || [ -z "$var_type" ] || [ -z "$sample_table" ]; then
+        var_usage
+        echo -e "Error: Required core options not found.\n"
+        exit 1
+    # choices
+    elif [ "$dect_mode" != "germline" ] && [ "$dect_mode" != "somatic" ]; then
+        echo -e "Error: Unrecognized detection mode \"$dect_mode\"\n"
+        exit 1
+    elif [ $seq_method != "wgs" ] && [ $seq_method != "wes" ]; then
+        echo -e "Error: Unrecognized sequencing method \"$seq_method\"\n"
+        exit 1
+    elif [ $file_type != "fastq" ] && [ $file_type != "bam" ]; then
+        echo -e "Error: Unrecognized file type \"$file_type\"\n"
+        exit 1
+    # else
+    elif [ "$seq_method" == "wes" ] && [ ! -f "$region" ]; then
+        echo -e "Error: Valid region .bed file is required when analyzing wes or target data.\n"
+        exit 1
+    elif [ ! -f "$sample_table" ]; then
+        echo -e "Error: Invalid sample information table path.\n"
+        exit 1
+    elif [ ! -d "$out_dir" ]; then
+        echo -e "Error: Invalid output directory.\n"
+        exit 1
+    fi
+    # Region: no region or .bed file
+    if [ -n "$region" ] && [ ! -f "$region" ]; then
+        echo -e "Error: Invalid region.\n"
+    fi
+
+    # check advance option
+    # in case G is added to memory input
+    memory=${memory%G}
+    # thread and memory should be INT
+    if [[ ! "$threads" =~ ^[0-9]+$ ]] || [[ ! "$memory" =~ ^[0-9]+$ ]]; then
+        echo -e "Error: Threads and memory input should be integer.\n"
+        exit 1
+    fi
+    memory_per=$(echo "1024*$memory/$threads" | bc)
+    memory_per="${memory_per}M"
+
+    # decide which variant types to detect
+    IFS=',' read -r -a array <<< $var_type
+    for element in "${array[@]}"; do
+        case $element in
+            short|SHORT|snv|snp|indel|SNV|SNP|INDEL) short_flag="True";;
+            cnv|CNV) cnv_flag="True";;
+            sv|SV) sv_flag="True";;
+            *)
+                echo "Error: unrecognized variant type \"$element\""
+                exit 1
+            ;;
+        esac
+    done
+
+    # decide tools to call snp/indel
+    if [ "$short_flag" == "True" ]; then
+        IFS=',' read -r -a array <<< $short_tool
+        for tool in "${array[@]}"; do
+            case $tool in
+                deepvariant) deepvariant_flag="True";;
+                strelka) strelka_flag="True";;
+                gatk) gatk_flag="True";;
+                *) 
+                    echo "Error: unrecognized short variant calling tool \"$tool\""
+                    exit 1
+                ;;
+            esac
+        done
+    fi
+
+    # decide tools to call sv
+    if [ "$sv_flag" == "True" ]; then
+        IFS=',' read -r -a array <<< $sv_tool
+        for tool in "${array[@]}"; do
+            case $tool in
+                manta) manta_flag="True";;
+                lumpy) lumpy_flag="True";;
+                delly) delly_flag="True";;
+                *) 
+                    echo "Error: unrecognized structural variant calling tool \"$tool\""
+                    exit 1
+                ;;
+            esac
+        done
+    fi
+    
+    # decide tools to call cnv
+    if [ "$cnv_flag" == "True" ]; then
+        IFS=',' read -r -a array <<< $cnv_tool
+        for tool in "${array[@]}"; do
+            case $tool in
+                cnvkit) cnvkit_flag="True";;
+                delly|delly_cnv) delly_cnv_flag="True";;
+                *) 
+                    echo "Error: unrecognized copy number variant calling tool \"$tool\""
+                    exit 1
+                ;;
+            esac
+        done
+        # determine bin size
+        if [ -z "$bin_size" ] && [ $seq_method == "wgs" ]; then
+            bin_size=1000
+        elif [ -z "$bin_size" ] && [ $seq_method != "wgs" ]; then
+            bin_size=267
+        fi
+    fi
+
+    # sample information table formatting
+    sed -i -e 's/\r$//' -e '$a\' $sample_table
+    grep -v '^$' $sample_table > $sample_table.tmp
+    mv $sample_table.tmp $sample_table
+    sample_num=$( cat $sample_table |wc -l )
+
+    # check sample information table
+    while IFS=',' read -r name input1 input2 condition sex; do
+        if [ -z "$name" ] || [ -z "$input1" ]; then
+            echo -e "Error: Name or input is necessarily required.\n"
+            exit 1
+        elif [ ! -f "$input1" ] || ([ -n "$input2" ] && [ ! -f "$input2" ]); then
+            echo -e "Error: Invalid path for sample $name input sequencing file.\n"
+            exit 1
+        elif [ $file_type == "fastq" ] && [ -z "input2" ]; then
+            echo -e "Error: Two fastq files should be provided for every sample.\n"
+            exit 1
+        fi
+    done < $sample_table
+    
+    # check somatic condition meet requirements
+    if [ $dect_mode == "somatic" ]; then
+        while IFS=',' read -r name input1 input2 condition sex; do
+            case $condition in
+                tumor) tumor_flag="True";;
+                control) control_flag="True";;
+            esac
+        done < $sample_table
+        if [ "$tumor_flag" != "True" ] || [ "$control_flag" != "True" ] || [ $sample_num != 2 ]; then
+            echo -e "Error: Incorrect conditions. One \"tumor\" and one \"control\" required for somatic mode.\n"
+            exit 1
+        fi
+    fi
+
+    # check the compatibility between the tool and the data
+    if [ "$deepvariant_flag" == "True" ] && [ $dect_mode == "somatic" ]; then
+        echo -e "Error: Deepvariant do not support somatic mutants calling.\n"
+        exit 1
+    elif [ $seq_method != "wgs" ] && [ "$sv_flag" == "True" ] && ( [ "$delly_flag" == "True" ] || [ "$lumpy_flag" == "True" ] ); then
+        echo -e "Error: Structural variants calling of WES or target data is only supported by Manta.\n"
+        exit 1
+    elif [ $seq_method != "wgs" ] && [ "$cnv_flag" == "True" ] && [ "$delly_cnv_flag" == "True" ]; then
+        echo -e "Error: CNV calling of WES or target data is only supported by CNVkit.\n"
+        exit 1
+    # elif [ "$strelka_flag" == "True" ] && [ $sample_num -gt 10 ]; then
+    #     echo -e "Warning: The group analysis in Strelka is not recommanded for more than 10 samples.\n"
+    #     exit 1
+    # elif [ "$manta_flag" == "True" ] && [ $sample_num -gt 10 ]; then
+    #     echo -e "Warning: The group analysis in Manta is not recommanded for more than 10 samples.\n"
+    fi
+
+    temp_dir=$out_dir/temp
+    mkdir -p $temp_dir
+
+    # Align and preprocess
+    while IFS=',' read -r name input1 input2 condition sex; do
+        RG="@RG\tID:unknown\tPL:unknown\tLB:unknown\tSM:$name"
+        # bash $dnapipe_dir/scripts/align_pre.sh "$file_type" "$input1" "$input2" "$threads" "$memory_per" "$out_dir" "$RG" "$rm_dup" "$sup_clip" "$mapq_min" "$force_rg"
+    done < $sample_table
+
+    # Call SNP/INDEL
+    vcf_list=$temp_dir/vcf2annot.txt
+    true > $vcf_list
+    # run GATK
+    if [ "$gatk_flag" == "True" ]; then
+        bash $dnapipe_dir/scripts/gatk.sh $dect_mode $seq_method $sample_table $out_dir $region
+        echo "$out_dir/gatk/snv_gatk.vcf" >> $vcf_list
+        echo "$out_dir/gatk/indel_gatk.vcf" >> $vcf_list
+    fi
+    # run strelka for SNP/INDEL
+    if [ "$strelka_flag" == "True" ]; then
+        # bash $dnapipe_dir/scripts/strelka.sh $dect_mode $seq_method $sample_table $out_dir $threads "$region"
+        echo "$out_dir/strelka/snv_strelka.vcf" >> $vcf_list
+        echo "$out_dir/strelka/indel_strelka.vcf" >> $vcf_list
+    fi
+    # run Deepvariant for SNP/INDEL
+    if [ "$deepvariant_flag" == "True" ]; then
+        bash $dnapipe_dir/scripts/deepvar.sh $seq_method $sample_table $out_dir $threads "$region"
+        echo "$out_dir/deepvar/snv_deepvar.vcf" >> $vcf_list
+        echo "$out_dir/deepvar/indel_deepvar.vcf" >> $vcf_list
+    fi
+
+    # Call SV
+    if [ "$delly_flag" == "True" ]; then
+        bash $dnapipe_dir/scripts/delly.sh $dect_mode $sample_table $out_dir "$region"
+        echo "$out_dir/delly/sv_delly.vcf" >> $vcf_list
+    fi
+    if [ "$manta_flag" == "True" ]; then
+        # bash $dnapipe_dir/scripts/manta.sh $dect_mode $seq_method $sample_table $out_dir $threads "$region"
+        echo "$out_dir/manta/sv_manta.vcf" >> $vcf_list
+    fi
+    if [ "$lumpy_flag" == "True" ]; then
+        bash $dnapipe_dir/scripts/lumpy.sh $dect_mode $sample_table $out_dir $threads
+        echo "$out_dir/lumpy/sv_lumpy.vcf" >> $vcf_list
+    fi
+
+    # Call CNV
+    if [ "$delly_cnv_flag" == "True" ]; then
+        bash $dnapipe_dir/scripts/delly_cnv.sh $dect_mode $sample_table $out_dir $bin_size
+        echo "$out_dir/delly_cnv/cnv_delly.vcf" >> $vcf_list
+    fi
+    if [ "$cnvkit_flag" == "True" ]; then
+        bash $dnapipe_dir/scripts/cnvkit.sh $dect_mode $sample_table $out_dir $threads $bin_size "$region" $seq_method
+        if [ $dect_mode == "somatic" ]; then
+            echo "$out_dir/cnvkit/cnv_cnvkit.vcf" >> $vcf_list
+        else
+            while IFS=',' read -r name input1 input2 condition sex; do
+                echo "$out_dir/cnvkit/vcfs/${name}_cnvkit.vcf" >> $vcf_list
+            done
+        fi
+    fi
+    
+    echo "============= Variant calling done ============="
+
+    # Annotate
+    if [ "$annot_flag" == "True" ]; then
+        cat $vcf_list | while read vcf; do
+            bash $dnapipe_dir/scripts/annotate.sh $vcf $out_dir $threads $annot_para
+        done
+    fi
+
+}
+
+# 5. Figure plotting module
+function plot() {
+    function plot_usage() {
+        echo "
+usage:   dnapipe plot <input_options> <plot_types> [extra_options]
+
+Input options:
+        --snp           Provide SNP vcf.
+        --indel         Provide INDEL vcf.
+        --cnv           Provide CNV vcf.
+        --sv            Provide SV vcf.
+        -o/--outdir     Specify the output directory. (default: the current working directory)
+
+Plot types:
+        --category      Plot the category.
+        --length        Plot the length distribution.
+        --pathogenicity Plot the pathogenicity prediction.
+        --circos        Plot the Circos plot.
+        --go, --kegg, --ppi     
+                        Plot the analysis result of GO/KEGG/PPI analysis.
+        
+Additional Options:
+        --bin           Set the bin size for the Circos plot, in bp. (default: 5000000)
+        --cadd_score    Set the score threshold for CADD. (default: 10)
+        -h/--help       Show this help message and exit.
+"
+    }
+    
+    if test -z "$1"
+    then
+        plot_usage
+        exit 1
+    fi
+
+    # set defaults
+    for name in category length pathogenicity circos go kegg ppi; do
+        declare "$name=False"
+    done
+    for name in SNP INDEL CNV SV; do
+        declare "$name=NA"
+    done
+    bin=5000000
+    cadd_score=10
+    out_dir=$PWD
+
+    VALID_ARGS=$(getopt -o "o:h" --longoptions "outdir:,snp:,indel:,sv:,cnv:,category,length,pathogenicity,circos,go,kegg,ppi,help,bin:,cadd_score:" -- "$@")
+    if [[ $? -ne 0 ]]; then
+        var_usage
+        exit 1;
+    fi
+    eval set -- "$VALID_ARGS"
+    while true; do
+        case "$1" in
+            --help|-h)
+                plot_usage
+                exit 1
+            ;;
+            --outdir|-o)
+                out_dir=$2
+                shift 2
+            ;;
+            --snp)
+                SNP=$2
+                shift 2
+            ;;
+            --indel)
+                INDEL=$2
+                shift 2
+            ;;
+            --sv)
+                SV=$2
+                shift 2
+            ;;
+            --cnv)
+                CNV=$2
+                shift 2
+            ;;
+            --category)
+                category="True"
+                shift 1
+            ;;
+            --length)
+                length="True"
+                shift 1
+            ;;
+            --pathogenicity)
+                pathogenicity="True"
+                shift 1
+            ;;
+            --circos)
+                circos="True"
+                shift 1
+            ;;
+            --go)
+                go="True"
+                shift 1
+            ;;
+            --kegg)
+                kegg="True"
+                shift 1
+            ;;
+            --ppi)
+                ppi="True"
+                shift 1
+            ;;
+            --bin)
+                bin=$2
+                shift 2
+            ;;
+            --cadd_score)
+                cadd_score=$2
+                shift 2
+            ;;
+            --)
+                shift
+                break
+            ;;
+        esac
+    done
+
+    source $config
+    cat $ref.fai | cut -f 1,2 | head -n 24 > $out_dir/chr_len.txt
+    conda run -n $env_dnapipe_py3 Rscript \
+        $dnapipe_dir/scripts/visual.R $category $length $pathogenicity $circos $go $kegg $ppi $out_dir $SNP $INDEL $SV $CNV $bin $cadd_score
+}
+
+
+## Main
+
+# obtain the configuration path
+dnapipe_dir=$(readlink -f `dirname $0`)
+config="$dnapipe_dir/dnapipe.config"
+
+# check arguments
+if test -z "$1"
+then
+    usage
+    exit 1
+fi
+
+while getopts "h" OPTION
+do
+    case $OPTION in
+        h|?)
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+# function modules
+case "$1" in 
+    'init')
+	init "${@:2}"
+	;;
+    'ref')
+    ref "${@:2}"
+	;;
+    'var')
+    var "${@:2}"
+	;;
+    'plot')
+    plot "${@:2}"
+	;;
+    *)
+	usage
+	echo -e "Error: command \"$1\" not recognized\n"
+	exit 1
+    ;;
+esac
+
+## END SCRIPT
