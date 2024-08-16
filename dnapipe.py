@@ -408,7 +408,6 @@ class var_page(tk.Frame):
 
         group.pack(anchor='center', expand=True)
 
-
     def set_option_default(self):
         self.detect_mode_combobox.set("germline")
         self.seq_method.set("wgs")
@@ -416,7 +415,6 @@ class var_page(tk.Frame):
         self.vartype_variable[0].set(True)
         self.vartype_variable[1].set(False)
         self.vartype_variable[2].set(False)      
-        
 
     def run_var(self):
 
@@ -464,7 +462,6 @@ class var_page(tk.Frame):
         if option["seq_method"] == "wes" and not option["region"]:
             tk.messagebox.showerror("ERROR", "Region .bed file is required when analyzing wes or target data!")
 
-
         optional = {
             "--remove-dup": advance_option["rmdup"],
             "--soft-clip": advance_option["softclip"],
@@ -503,17 +500,13 @@ class visual_page(tk.Frame):
         super().__init__(parent)
         
         self.configure(bg="white")
-
         self.vcf_list = ["SNV:", "INDEL:", "SV:", "CNV:"]
         self.visual_list = ["Figure:", "","Analysis:"]
         self.plot_list = ["Category", "Length", "Pathogenicity*", "Circos"]
         self.analysis_list = ["GO*", "KEGG*", "PPI*"]
-
         self.plot_var = {}
         self.analysis_var = {}
-
         self.visual_group = tk.LabelFrame(self, text="",borderwidth=0, **style_group)
-
         self.create_widgets()
 
     def create_widgets(self):
@@ -559,7 +552,6 @@ class visual_page(tk.Frame):
         tk.Button(self.visual_group, text="Reset", command=self.reset, **style_button_big).grid(row=99, column=2, sticky='nw', padx=(30, 0),  pady=15, columnspan=2)
  
         self.visual_group.pack(anchor='center', expand=True)
-
     
     def circos_click(self):
         if self.plot_var[len(self.plot_list)-1].get():
@@ -650,8 +642,6 @@ class visual_page(tk.Frame):
         self.entries[4].insert(0, "10")
 
 
-    
-        
 
 class App(tk.Tk):
 
@@ -662,9 +652,6 @@ class App(tk.Tk):
         self.set_output()
         
     def set_window(self):
-        # default_font = tkFont.nametofont("TkDefaultFont")
-        # default_font.configure(family="Noto Sans", size=13)
-
         s = ttk.Style()
         s.theme_use('default')
         s.configure('TNotebook', background="white")
@@ -688,10 +675,8 @@ class App(tk.Tk):
         group1.pack(side="right", fill="both", expand=True)
 
     def set_main(self):
-
         frame_main = tk.Frame(self, bg="white", height=500)
         frame_main.pack(side="left", fill="both", expand=True)
-
         self.notebook = ttk.Notebook(frame_main, width=520)
         page_help = init_page(self.notebook)
         page_var = var_page(self.notebook)
