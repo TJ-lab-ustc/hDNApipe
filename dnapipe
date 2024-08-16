@@ -234,18 +234,18 @@ Computing options:
 
 Align and preprocess:
         --mapq/-Q   INT     Minimum map quality score for output (default: 30)
-        --remove-dup/-D     Remove duplicates rather than just marking them. (default: not used)
-        --soft-clip/-Y      Use soft clipping for supplementary alignments instead of hard clipping. (default: not used)
-        --force-rg          Force the addition or replacement of read group information. (default: not used)
+        --remove-dup/-D     Remove duplicates rather than just marking them. (default: disabled)
+        --soft-clip/-Y      Use soft clipping for supplementary alignments instead of hard clipping. (default: disabled)
+        --force-rg          Force the addition or replacement of read group information. (default: disabled)
 
 Variants calling:
-        --short   STR       Select SNP/Indel calling tools: "strelka", "deepvariant", "gatk".  (default:strelka)
+        --short   STR       Select SNP/Indel calling tools: "strelka", "deepvariant", "gatk".  (default: strelka)
                                 Note that "deepvariant" does NOT support "somatic".
         --sv      STR       Select SV calling tools: "manta", "lumpy", "delly" (default: manta)
-        --cnv     STR       Select CNV calling tools: "cnvkit", "delly" (default:cnvkit)
-        --bin     INT       CNV calling bin size in bp (default: 1000 for wgs and 267 for wes)
+        --cnv     STR       Select CNV calling tools: "cnvkit", "delly" (default: cnvkit)
+        --bin     INT       CNV calling bin size in bp (default: 10000)
 
-Annotation: (default: not use these options)
+Annotation: (default: options not enabled)
         --annot             Use VEP to annotate SNP/INDEL vcf with default information and AnnotSV for SV/CNV
                                 ( VEP annotation includes: Gene in ENSG, Feature,Feature_type, Consequence, cDNA_position, 
                                                             CDS_position, Protein_position, Amino_acids, Codons, IMPACT )
@@ -284,6 +284,7 @@ other option:
     sv_tool="manta"
     cnv_tool="cnvkit"
     annot_para=""
+    bin_size=10000
 
     # import config
     source $config
@@ -517,12 +518,6 @@ other option:
                 ;;
             esac
         done
-        # determine bin size
-        if [ -z "$bin_size" ] && [ $seq_method == "wgs" ]; then
-            bin_size=1000
-        elif [ -z "$bin_size" ] && [ $seq_method != "wgs" ]; then
-            bin_size=267
-        fi
     fi
 
     # sample information table formatting
@@ -644,9 +639,8 @@ other option:
             echo "Annotating $vcf ..."
             bash $dnapipe_dir/scripts/annotate.sh $vcf $out_dir $threads $annot_para
         done
+        echo "============= Variant annotation done ============="
     fi
-
-    echo "============= Variant annotation done ============="
 
 }
 
