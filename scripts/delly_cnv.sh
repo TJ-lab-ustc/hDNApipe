@@ -37,21 +37,21 @@ if [ $dect_mode == "somatic" ]; then
     # get delly tsv
     echo -e "${tumor_name}\ttumor\n${control_name}\tcontrol\n" > $out_dir/delly_cnv/else/delly_sample.tsv
     # run
-    # delly cnv \
-    #     -u \
-    #     -z $bin_size \
-    #     -o $out_dir/delly_cnv/else/tumor.bcf \
-    #     -c $out_dir/delly_cnv/else/tumor.cov.gz \
-    #     -g $ref \
-    #     -m $map \
-    #     $tumor_bam
-    # delly cnv \
-    #     -u \
-    #     -v $out_dir/delly_cnv/else/tumor.bcf \
-    #     -o $out_dir/delly_cnv/else/control.bcf \
-    #     -g $ref \
-    #     -m $map \
-    #     $control_bam
+    delly cnv \
+        -u \
+        -z $bin_size \
+        -o $out_dir/delly_cnv/else/tumor.bcf \
+        -c $out_dir/delly_cnv/else/tumor.cov.gz \
+        -g $ref \
+        -m $map \
+        $tumor_bam
+    delly cnv \
+        -u \
+        -v $out_dir/delly_cnv/else/tumor.bcf \
+        -o $out_dir/delly_cnv/else/control.bcf \
+        -g $ref \
+        -m $map \
+        $control_bam
     bcftools merge \
         -m id \
         -O b \
@@ -74,7 +74,7 @@ if [ $dect_mode == "somatic" ]; then
         $out_dir/delly_cnv/else/somatic.bcf \
         > $out_dir/delly_cnv/else/segmentation.bed
     cd $out_dir/delly_cnv/figure
-    /usr/bin/Rscript $DELLY_plot_dir/rd.R \
+    Rscript $DELLY_plot_dir/rd.R \
         $out_dir/delly_cnv/else/tumor.cov.gz \
         $out_dir/delly_cnv/else/segmentation.bed
 
@@ -137,6 +137,6 @@ else
             $out_dir/delly_cnv/else/filtered.bcf \
             > $out_dir/delly_cnv/else/plot.tsv
         cd $out_dir/delly_cnv/figure
-        /usr/bin/Rscript $DELLY_plot_dir/cnv.R $out_dir/delly_cnv/else/plot.tsv
+        Rscript $DELLY_plot_dir/cnv.R $out_dir/delly_cnv/else/plot.tsv
     fi
 fi
