@@ -64,7 +64,7 @@ class init_page(tk.Frame):
         group = tk.LabelFrame(self, text="",borderwidth=0, **style_group)
 
         text1 = "For first-time use initiation:"
-        text2 = "Step 1. Click \"Initiate\" button to install necessary dependencies and resources."
+        text2 = "Step 1. Click \"Initiate\" button to install necessary resources."
         text3 = "Step 2. Click \"Reference\" button to set or get hg38 reference genome."
         text4 = "* For very detailed information, please visit https://github.com/TJ-lab-ustc/hDNApipe"
         for i in range(1,5):
@@ -98,7 +98,7 @@ class init_page(tk.Frame):
         output_box.insert(tk.END, "Initiating..." + "\n")
         output_box.config(state="disabled")
         dnapipe_script = dnapipe_dir + "/dnapipe"
-        command = ["bash", dnapipe_script, "init", "--all"]
+        command = ["bash", dnapipe_script, "init", "--annot"]
         t = threading.Thread(target=run_init_shell)
         t.start()
 
