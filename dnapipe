@@ -27,7 +27,7 @@ Author: Zhang Yaxin (zhangyaxin@mail.ustc.edu.cn)
 
 usage:  dnapipe <command> [options]
 
-command: init   Automatically configure the environment. It can be skipped if manual configuration is completed.
+command: init   Download the files necessary for variants calling.
          ref    Select a reference genome from an existing file or automatically download it. 
                 An automatic indexing will be performed if related files are not found.
          var    Run several variant calling pipelines from a clean fastq file or bam file. 
@@ -39,16 +39,16 @@ options:
 }
 
 
-## 2. Enviroment initiation
+## 2. Initiation
 function init() {
 
     function init_usage() {
         echo "
-usage:  dnapipe init --all [-o output_dir]
-    
-    It can be divided into two steps for software installation and data files download:
-        dnapipe init --tool [-o output_dir]
-        dnapipe init --data [-o output_dir]
+usage: 
+    To download the files associated with the annotation (which may take a long time):
+        dnapipe init --annot [-o output_dir]
+    To download the files associated with the variant calling (already exists in the Docker image, just in case):
+        dnapipe init --var [-o output_dir]
 "
     }
     
@@ -62,7 +62,7 @@ usage:  dnapipe init --all [-o output_dir]
     out_dir=$PWD
 
     # get options
-    VALID_ARGS=$(getopt -o "o:h" --longoptions "all,tool,data,help" -- "$@")
+    VALID_ARGS=$(getopt -o "o:h" --longoptions "annot,var,help" -- "$@")
     if [[ $? -ne 0 ]]; then
         init_usage
         exit 1;
@@ -74,17 +74,12 @@ usage:  dnapipe init --all [-o output_dir]
                 out_dir=$(readlink -f $2)
                 shift 2
             ;;
-            --all)
-                tool_flag="True"
-                data_flag="True"
+            --annot)
+                annot_download="True"
                 shift
             ;;
-            --tool)
-                tool_flag="True"
-                shift
-            ;;
-            --data)
-                data_flag="True"
+            --var)
+                var_download="True"
                 shift
             ;;
             --help|-h)
@@ -96,6 +91,11 @@ usage:  dnapipe init --all [-o output_dir]
             ;;
         esac
     done
+
+    if [ "$annot_download" != "True" ] && [ "$var_download" != "True" ]; then
+        echo "Lacking the argument!"
+        exit 1
+    fi
 
     echo "Initiating..."
     download_dir=$out_dir/download
@@ -110,14 +110,14 @@ usage:  dnapipe init --all [-o output_dir]
         exit 1
     fi
 
-    # tools download
-    if [ "$tool_flag" == "True" ]; then
-        bash $dnapipe_dir/scripts/install_tools.sh $download_dir $dnapipe_dir
+    # var download
+    if [ "$var_download" == "True" ]; then
+        bash $dnapipe_dir/scripts/init.sh $download_dir $dnapipe_dir
     fi
 
-    # resource download
-    if [ "$data_flag" == "True" ]; then
-        bash $dnapipe_dir/scripts/download_resource.sh $download_dir $dnapipe_dir        
+    # annotation download
+    if [ "$annot_download" == "True" ]; then
+        bash $dnapipe_dir/download_annotation.sh $download_dir     
     fi
     
     echo "**********Initiation Done**********"
