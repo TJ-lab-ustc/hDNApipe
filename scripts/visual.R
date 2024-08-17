@@ -49,7 +49,7 @@ vep_annot_pre <- function(vcf_path, var_type) {
     title <- unlist(strsplit(title_line[[1]][1], split = "\\|"))
 
     vcf <- get(var_type)
-    vcf_info <- separate(vcf, info, into = title, sep = "\\|", remove = TRUE) #对于注释中多种（含有，）处理不好
+    vcf_info <- separate(vcf, info, into = title, sep = "\\|", remove = TRUE)
     vcf_info <- vcf_info[, -c(1:4)]
     colnames(vcf_info) <- title
 
@@ -57,7 +57,6 @@ vep_annot_pre <- function(vcf_path, var_type) {
 }
 
 # 4. vcf pre-process
-# lumpy cnv?????
 if (SV != 'NA') {
     print("getting SV vcf file info")
     x <- strsplit(sv$info, ";")
