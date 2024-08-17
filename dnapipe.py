@@ -343,7 +343,7 @@ class var_page(tk.Frame):
         grid_label_header = {"sticky": "w", "pady": 10, "columnspan": 2}
         grid_label_col1st = {"sticky": "w", "padx": (0, 10), "pady": 7}
 
-        tk.Label(group, text="Analysis Options", **style_label_header).grid(row=0, column=0, **grid_label_header)
+        tk.Label(group, text="Analysis Options", **style_label_header).grid(row=0, column=0, sticky='w', columnspan=2)
 
         row1 = 1
         label_list2 = ["Detection Mode:", "Sequencing Method:", "Input file Type:", "Variant calling:", "", "Region(.bed)*:", "Output directory:"]
@@ -403,8 +403,8 @@ class var_page(tk.Frame):
 
         self.set_option_default()
 
-        tk.Button(group, text="RUN", command=self.run_var, **style_button_big).grid(row=100, column=0, pady=(20, 0), padx=(50,0), sticky='w', columnspan=2)
-        tk.Button(group, text="RESET", command=self.reset_var, **style_button_big).grid(row=100, column=2, pady=(20, 0), sticky='w', columnspan=2)
+        tk.Button(group, text="RUN", command=self.run_var, **style_button_big).grid(row=100, column=0, pady=(20, 10), padx=(50,0), sticky='w', columnspan=2)
+        tk.Button(group, text="RESET", command=self.reset_var, **style_button_big).grid(row=100, column=2, pady=(20, 10), sticky='w', columnspan=2)
 
         group.pack(anchor='center', expand=True)
 
@@ -435,7 +435,9 @@ class var_page(tk.Frame):
 
             proc.communicate()
             if (proc.returncode != 0):
-                tk.messagebox.showinfo("INFO", "Execution failed. See log in output window.")
+                tk.messagebox.showinfo("INFO", "Execution failed. See log in output window or output directory.")
+            else:
+                tk.messagebox.showinfo("INFO", "Execution completed!")
 
         option = {
             "dect_mode": self.detect_mode_combobox.get(),
@@ -511,8 +513,8 @@ class visual_page(tk.Frame):
 
     def create_widgets(self):
 
-        pos_label_header1 = {"sticky":'w', "columnspan": 2, "pady": 10} #, "padx": 30, "pady": (25,10)
-        pos_label_col1st = {"sticky":'w', "pady": 2, "padx": (30,0)} #, "padx": (60,10)
+        pos_label_header1 = {"sticky":'w', "columnspan": 2, "pady": 10}
+        pos_label_col1st = {"sticky":'w', "pady": 2, "padx": (30,0)}
 
         tk.Label(self.visual_group, text="VCF file Input", **style_label_header).grid(row=0, column=0, **pos_label_header1)
         self.entries = []
