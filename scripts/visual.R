@@ -412,7 +412,7 @@ if (circos == 'True' && SNP != 'NA' && INDEL != 'NA' && SV != 'NA') {
 # 5-4. pathogenicity and analysis of short variants (annotated)
 # snp (SNFT/PolyPhen2 annotated)
 genelist <- NULL
-if (patho == "True" | analysis && SNP != 'NA') {
+if ((patho =="True" | analysis) & SNP != 'NA') {
     snp_info <- vep_annot_pre(SNP, "snp")
     if("SYMBOL" %in% colnames(snp_info)) {
         pathogenicity <- snp_info[(snp_info$SIFT != "" & snp_info$PolyPhen != ""), c("Gene","SYMBOL", "SIFT", "PolyPhen")]
@@ -455,7 +455,7 @@ if (patho == "True" | analysis && SNP != 'NA') {
 }
 
 # indel (CADD annotated)
-if (patho =="True" | analysis && INDEL != 'NA') {
+if ((patho =="True" | analysis) & INDEL != 'NA') {
     indel_info <- vep_annot_pre(INDEL, "indel")
     if ("SYMBOL" %in% colnames(indel_info)) {
       cadd_table <- indel_info[indel_info$CADD_PHRED != "" | indel_info$CADD_RAW != "", c("Gene", "SYMBOL", "CADD_PHRED", "CADD_RAW")]
@@ -602,3 +602,4 @@ if (analysis) {
 
 }
 
+writeLines("*****Plotting done.*****\n\n")
