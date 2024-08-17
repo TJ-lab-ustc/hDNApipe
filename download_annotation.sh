@@ -51,7 +51,7 @@ sed -i "s|^annotsv_dir=\".*\"|annotsv_dir=\"$annotsv_dir\"|" $config
 
 vep_dir=$download_dir/vep_annot
 
-# mkdir -p $vep_dir/Plugins
+mkdir -p $vep_dir/Plugins
 
 wget https://raw.githubusercontent.com/Ensembl/VEP_plugins/release/112/CADD.pm \
     -O $vep_dir/Plugins/CADD.pm
@@ -76,7 +76,7 @@ wget https://krishna.gs.washington.edu/download/CADD/v1.7/GRCh38/gnomad.genomes.
 
 sed -i "s|^vep_dir=\".*\"|vep_dir=\"$vep_dir\"|" $config
 
-# vep annotation (take long time)
+# vep annotation (take a long time)
 
 mkdir -p $vep_dir/Cache
 
