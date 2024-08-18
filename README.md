@@ -38,23 +38,7 @@ bash download_annoatation.sh <out_dir>
 ## Usage
 
 ### Command-Line
-There are four components in hDNApipe:
-  1. init - This is used for downloading necessary resource files when installing hDNApipe for the first time. However, they have already been downloaded in the docker image. There is no necessity to utilize this, but we retained this function just in case.
-  2. ref - This is used for setting the reference genome. 
-  3. var - The main module in hDNApipe. It is used to run the genomic analysis pipeline, including alignment, preprocessing, variant calling, and annotation.
-  4. plot - Used to plot additional statistics and analysis graphs.
-```
-usage:  dnapipe <command> [options]
-
-command: init   Download the files necessary for variants calling.
-         ref    Select a reference genome from an existing file or automatically download it. 
-                An automatic indexing will be performed if related files are not found.
-         var    Run several variant calling pipelines from a clean fastq file or bam file. 
-         plot   Plot additional statistics and analysis graphs.
-
-options: 
-        -h       show this message
-```
+There are four components in hDNApipe.
 
 #### dnapipe init
 This is used for downloading necessary resource files when installing hDNApipe for the first time. However, they have already been downloaded in the docker image. There is no necessity to utilize this, but we retained this function just in case.
@@ -95,6 +79,40 @@ Core options:
                                 (Use , to link, such as short,cnv,sv)
         --sample-info/-i    Provide sample informtion table.
         --region/-r         Region to detect variants on. Bed file. Only necessary for wes/target data.
+```
+And there are more parameters for advanced users to customize: 
+```
+Computing options:
+        -t threads  INT     Threads employed for multi-thread tasks (default: 1/2 of the total)
+        -m memory   INT     Set the maximum memory in G (default: 1/2 of the total)
+
+Align and preprocess:
+        --mapq/-Q   INT     Minimum map quality score for output (default: 30)
+        --remove-dup/-D     Remove duplicates rather than just marking them. (default: disabled)
+        --soft-clip/-Y      Use soft clipping for supplementary alignments instead of hard clipping. (default: disabled)
+        --force-rg          Force the addition or replacement of read group information. (default: disabled)
+
+Variants calling:
+        --short   STR       Select SNP/Indel calling tools: strelka, deepvariant, gatk.  (default: strelka)
+                                Note that deepvariant does NOT support somatic.
+        --sv      STR       Select SV calling tools: manta, lumpy, delly (default: manta)
+        --cnv     STR       Select CNV calling tools: cnvkit, delly (default: cnvkit)
+        --bin     INT       CNV calling bin size in bp (default: 10000)
+
+Annotation: (default: options not enabled)
+        --annot             Use VEP to annotate SNP/INDEL vcf with default information and AnnotSV for SV/CNV
+                                ( VEP annotation includes: Gene in ENSG, Feature,Feature_type, Consequence, cDNA_positio                                                      n,
+                                                            CDS_position, Protein_position, Amino_acids, Codons, IMPACT                                                       )
+    More VEP annotation information can be added:
+        --symbol            Add Gene Symbol information.
+        --exist             Check the existence of each variant.
+        --pathogenicity     Predict the pathogenicity of SNV and INDEL by SIFT, PolyPhen2, and CADD respectively.
+        --frequency         Add Population allele frequency.
+        --clinvar           Add Clinvar database annotation.
+    Reports:
+        --report            Generate reports for annotation results.
+    Else:
+        --annot-all         Use all the above options in annotation.
 ```
 
 
