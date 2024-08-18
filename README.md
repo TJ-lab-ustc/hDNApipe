@@ -85,7 +85,7 @@ The main module in hDNApipe. It is used to run the genomic analysis pipeline, in
 ```
 usage:   dnapipe var <core_options> [extra_options]
 ```
-There are basic arguments must be declared in running. 
+There are basic arguments that must be declared during running var module. There are some options for the detection mode, sequencing method, sequencing input file type, and variant types to call. A region file is required when analyzing WES or target data. Sample information table should be needed as follows [Input](#Input). 
 ```
 Core options:
         --mode/-M           Detection mode: germline or somatic
@@ -103,7 +103,7 @@ Core options:
 
 ## Config
 
-## Input (sample information table)
+## Input
 
 ## Output
 
