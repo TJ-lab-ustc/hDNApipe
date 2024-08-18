@@ -37,7 +37,28 @@ bash download_annoatation.sh <out_dir>
 ## Usage
 
 ### Command-Line
-4 module
+There are four components in hDNApipe:
+  1. init - This is used for downloading necessary resource files when installing hDNApipe for the first time. However, they have already been downloaded in the docker image. There is no necessity to utilize this, but we retained this function just in case.
+  2. ref - This is used for setting the reference genome. 
+  3. var - The main module in hDNApipe. It is used to run the genomic analysis pipeline, including alignment, preprocessing, variant calling, and annotation.
+  4. plot - Used to plot additional statistics and analysis graphs.
+```
+usage:  dnapipe <command> [options]
+
+command: init   Download the files necessary for variants calling.
+         ref    Select a reference genome from an existing file or automatically download it. 
+                An automatic indexing will be performed if related files are not found.
+         var    Run several variant calling pipelines from a clean fastq file or bam file. 
+         plot   Plot additional statistics and analysis graphs.
+
+options: 
+        -h       show this message
+```
+
+#### Init
+This is used for downloading necessary resource files when installing hDNApipe for the first time. However, they have already been downloaded in the docker image. There is no necessity to utilize this, but we retained this function just in case.
+
+
 
 ### Graphical user interface
 
@@ -51,6 +72,8 @@ bash download_annoatation.sh <out_dir>
 
 
 ## Example workflow
+
+
 
 # Troubleshooting
 If you encounter errors from hDNApipe, please report them on the [issues](https://github.com/TJ-lab-ustc/hDNApipe/issues) page. Any bug reports, suggestions and general feedback would be highly welcome.
