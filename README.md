@@ -155,6 +155,11 @@ Additional Options:
 
 
 ## Input
+The resources required for hDNApipe are declared in the config file, and the template is placed in [dnapipe.config]([url](https://github.com/TJ-lab-ustc/hDNApipe/blob/main/dnapipe.config)). If no modification of the docker container is made, the only change for the user is to complete three paths in the config: `dnapipe_dir`, `dir_vep_annot` and `annotsv_dir`. For example:
+
+
+
+
 
 ## Output
 
