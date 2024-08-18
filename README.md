@@ -100,9 +100,7 @@ Variants calling:
         --bin     INT       CNV calling bin size in bp (default: 10000)
 
 Annotation: (default: options not enabled)
-        --annot             Use VEP to annotate SNP/INDEL vcf with default information and AnnotSV for SV/CNV
-                                ( VEP annotation includes: Gene in ENSG, Feature,Feature_type, Consequence, cDNA_positio                                                      n,
-                                                            CDS_position, Protein_position, Amino_acids, Codons, IMPACT                                                       )
+        --annot             Use VEP to annotate SNP/INDEL vcf with default information and AnnotSV for SV/CNV                                                 )
     More VEP annotation information can be added:
         --symbol            Add Gene Symbol information.
         --exist             Check the existence of each variant.
@@ -114,6 +112,9 @@ Annotation: (default: options not enabled)
     Else:
         --annot-all         Use all the above options in annotation.
 ```
+
+#### dnapipe plot
+Used to plot additional statistics and analysis graphs from vcf files. 
 
 
 
