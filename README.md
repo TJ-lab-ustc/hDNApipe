@@ -55,8 +55,46 @@ options:
         -h       show this message
 ```
 
-#### Init
+#### dnapipe init
 This is used for downloading necessary resource files when installing hDNApipe for the first time. However, they have already been downloaded in the docker image. There is no necessity to utilize this, but we retained this function just in case.
+
+Download files used in variant calling: 
+```
+dnapipe init --var [-o output_dir]
+```
+Download files used in annotations, which may take lots of time:
+```
+dnapipe init --annot [-o output_dir]
+```
+
+#### dnapipe ref
+This is utilized for setting the reference genome. Two modes are provided. One is downloading the recommended reference online and indexing it; another one is choosing from an existing fasta file and indexing it if no related files are found in its directory.
+
+To download the recommended hg38 reference online:
+```
+dnapipe ref --download <save_dir>
+```
+To set an existing file as the reference:
+```
+dnapipe ref --set <ref.fa>
+```
+
+#### dnapipe var
+The main module in hDNApipe. It is used to run the genomic analysis pipeline, including alignment, preprocessing, variant calling, and annotation.
+```
+usage:   dnapipe var <core_options> [extra_options]
+```
+There are basic arguments must be declared in running. 
+```
+Core options:
+        --mode/-M           Detection mode: germline or somatic
+        --seq-method/-s     Sequence method: wgs or wes (For the target, choose wes).
+        --file-type/-f      Input sequencing file type: fastq or bam
+        --variant/-v        Variant type to call: short (refers to snv and indel), cnv or sv.
+                                (Use , to link, such as short,cnv,sv)
+        --sample-info/-i    Provide sample informtion table.
+        --region/-r         Region to detect variants on. Bed file. Only necessary for wes/target data.
+```
 
 
 
