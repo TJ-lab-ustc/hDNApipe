@@ -69,7 +69,7 @@ dnapipe init --annot [-o output_dir]
 ```
 
 #### dnapipe ref
-This is utilized for setting the reference genome. Two modes are provided. One is downloading the recommended reference online and indexing it; another one is choosing from an existing fasta file and indexing it if no related files are found in its directory.
+This is utilized for setting the reference genome. Two modes are provided. One is downloading the recommended reference online and indexing it; another one is choosing from an existing fasta file and indexing it if no related files are found in its directory. In fact, the recommended reference is also included in the docker image.
 
 To download the recommended hg38 reference online:
 ```
