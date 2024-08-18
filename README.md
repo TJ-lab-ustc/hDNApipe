@@ -12,10 +12,9 @@ Streamlining human genome analysis and interpretation with an intuitive and user
 
    * [Graphical user interface](#Graphical-user-interface)
    
-5. [Config](#Config)
-6. [Input](#Input)
-7. [Output](#Output)
-8. [Example Workflow](#Example)
+4. [Input](#Input)
+5. [Output](#Output)
+6. [Troubleshooting](#Troubleshooting)
 
 
 ## Introduction
@@ -40,6 +39,7 @@ bash download_annoatation.sh <out_dir>
 ```
 
 ## Usage
+  docker
 
 ### Command-Line
 There are four components in hDNApipe.
@@ -81,7 +81,7 @@ The main module in hDNApipe. It is used to run the genomic analysis pipeline, in
 ```
 usage:   dnapipe var <core_options> [extra_options]
 ```
-There are basic arguments that must be declared during running var module. There are some options for the detection mode, sequencing method, sequencing input file type, and variant types to call. A region file is required when analyzing WES or target data. Sample information table should be needed as follows [Input](#Input). 
+There are basic arguments that must be declared during running var module. There are some options for the detection mode, sequencing method, sequencing input file type, and variant types to call. A region file is required when analyzing WES or target data. Sample information table should be needed as [Input](#Input). 
 ```
 Core options:
         --mode/-M           Detection mode: germline or somatic
@@ -153,7 +153,6 @@ Additional Options:
 
 ### Graphical user interface
 
-## Config
 
 ## Input
 
@@ -162,11 +161,6 @@ Additional Options:
 
 
 
-## Example workflow
-
-
 
 # Troubleshooting
 If you encounter errors from hDNApipe, please report them on the [issues](https://github.com/TJ-lab-ustc/hDNApipe/issues) page. Any bug reports, suggestions and general feedback would be highly welcome.
-
-
