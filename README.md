@@ -1,13 +1,10 @@
-
-
 # hDNApipe
 Streamlining human genome analysis and interpretation with an intuitive and user-friendly pipeline
 
-
-
+<img src="https://github.com/user-attachments/assets/1816e1c0-dcbb-4df2-b660-bfdb43ebe002" width="700px">
 
 ## Table of Contents
-
+1. [Introduction](#Introduction)
 
 ## Introduction
 
@@ -44,6 +41,6 @@ bash download_annoatation.sh <out_dir>
 ## Example workflows
 
 # Troubleshooting
-If you encounter errors from hDNApipe, please report them on the issues page. Any bug reports, suggestions and general feedback would be highly welcome.
+If you encounter errors from hDNApipe, please report them on the [issues](https://github.com/TJ-lab-ustc/hDNApipe/issues) page. Any bug reports, suggestions and general feedback would be highly welcome.
 
 
