@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-set -x
 
 # function: call germline or somatic SV by lumpy
 # usuage: script_dir/lumpy.sh $dect_mode $sample_table $out_dir $threads
