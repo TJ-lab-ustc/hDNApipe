@@ -158,6 +158,15 @@ Additional Options:
 The resources required for hDNApipe are declared in the config file, and the template is placed in [dnapipe.config]([url](https://github.com/TJ-lab-ustc/hDNApipe/blob/main/dnapipe.config)). If no modification of the docker container is made, the only change for the user is to complete three paths in the config: `dnapipe_dir`, `dir_vep_annot` and `annotsv_dir`. For example:
 
 
+The sample information table is required for `dnapipe var`. It should contain information including: sample name, path1, path2, condition and sex. The sample name and at least one input path are necessary. The sample name refers to the name used for adding the BAM read group and the prefix of most output files. The path is prepared for the sequencing file location.The condition is needed to make it clear which one is `tumor` and which one is `control` when running somatic analysis; otherwise, it is not needed. Sex is optional. Use ',' as seperator. For example, a full information table looks like:
+```
+sample1,/path/sample1_1.fastq.gz,/path/sample1_2.fastq.gz,tumor,male
+sample2,/path/sample2_1.fastq.gz,/path/sample2_2.fastq.gz,normal,male
+```
+If there is some unnecessary information missing, do it like: 
+```
+sample,/path/sample.bam,,,
+```
 
 
 
