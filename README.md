@@ -8,7 +8,10 @@ Streamlining human genome analysis and interpretation with an intuitive and user
 2. [Setup](#Serup)
 3. [Usage](#Usage)
 
-   [dnapipe init](#dnapipe-init)
+   * [Command-Line](#Command-Line)
+
+   * [Graphical user interface](#Graphical-user-interface)
+   
 5. [Config](#Config)
 6. [Input](#Input)
 7. [Output](#Output)
@@ -40,6 +43,14 @@ bash download_annoatation.sh <out_dir>
 
 ### Command-Line
 There are four components in hDNApipe.
+
+1. [dnapipe init](#dnapipe-init) for the first time downloading.
+
+2. [dnapipe ref](#dnapipe-ref) for setting reference genome.
+
+3. [dnapipe var](#dnapipe-var) for genomic analysis pipeline.
+
+4. [dnapipe plot](#dnapipe-plot) for plotting.
 
 #### dnapipe init
 This is used for downloading necessary resource files when installing hDNApipe for the first time. However, they have already been downloaded in the docker image. There is no necessity to utilize this, but we retained this function just in case.
@@ -139,7 +150,6 @@ Additional Options:
         --cadd_score    Set the score threshold for CADD. (default: 10)
         -h/--help       Show this help message and exit.
 ```
-
 
 ### Graphical user interface
 
