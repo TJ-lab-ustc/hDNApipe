@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Usage: bash annotate.sh $vcf_file $out_dir $threads [annotation_paramters]
 # Function: annotate vcf by VEP and AnnotSV
