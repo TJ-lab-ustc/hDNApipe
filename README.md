@@ -42,13 +42,13 @@ Use `docker run -v` to to map into the container the folder of our tool `hDNApip
 docker run \
   -v /path/hDNApipe/:/hDNApipe \
   -v /path/AnnotSV_annotations:/AnnotSV_annotations \
-  -v /path/vep_annot/:/vep_annot
-  -v /path/data:/input
+  -v /path/vep_annot/:/vep_annot \
+  -v /path/data:/input \
   -it hDNApipe /bin/bash
 ```
-Additional settings should be added to run the GUI
+Additional settings are required to make the remote GUI accessible:
 ```
---net=host -e DISPLAY=:10.0 -v /home/.Xauthority:/root/.Xauthority
+--net=host -e DISPLAY=:10.0 -v /$HOME/.Xauthority:/root/.Xauthority
 ```
 
 ### Command-Line
