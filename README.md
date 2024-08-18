@@ -5,8 +5,12 @@ Streamlining human genome analysis and interpretation with an intuitive and user
 
 ## Table of Contents
 1. [Introduction](#Introduction)
-
-
+2. [Setup](#Serup)
+3. [Usage](#Usage)
+4. [Config](#Config)
+5. [Input](#Input)
+6. [Output](#Output)
+7. [Example Workflow](#Example)
 
 
 ## Introduction
@@ -14,7 +18,7 @@ Streamlining human genome analysis and interpretation with an intuitive and user
 
 
 
-## Installation
+## Setup
 Due to the complexity of configuring the environment necessary for hDNApipe, as it involves numerous tools and dependencies, we have made hDNApipe into a Docker container image based on the Ubuntu operating system.
 
 The docker image can be downloaded from xxx.
@@ -30,18 +34,23 @@ chmod +x ./dnapipe
 bash download_annoatation.sh <out_dir>
 ```
 
-## Command-Line usage
+## Usage
+
+### Command-Line
 4 module
+
+### Graphical user interface
+
+## Config
 
 ## Input (sample information table)
 
 ## Output
 
-## config
 
-## Graphical user interface
 
-## Example workflows
+
+## Example workflow
 
 # Troubleshooting
 If you encounter errors from hDNApipe, please report them on the [issues](https://github.com/TJ-lab-ustc/hDNApipe/issues) page. Any bug reports, suggestions and general feedback would be highly welcome.
