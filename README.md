@@ -7,10 +7,11 @@ Streamlining human genome analysis and interpretation with an intuitive and user
 1. [Introduction](#Introduction)
 2. [Setup](#Serup)
 3. [Usage](#Usage)
-4. [Config](#Config)
-5. [Input](#Input)
-6. [Output](#Output)
-7. [Example Workflow](#Example)
+     [dnapipe init](#dnapipe init)
+5. [Config](#Config)
+6. [Input](#Input)
+7. [Output](#Output)
+8. [Example Workflow](#Example)
 
 
 ## Introduction
