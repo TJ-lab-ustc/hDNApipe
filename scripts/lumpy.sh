@@ -81,8 +81,8 @@ else
 fi
 
 # 5. Genotype
-awk '{printf "##contig=<ID=%s,length=%s>\n", $1, $2}' $ref > $out_dir/lumpy/contigs.txt
-cat contigs.txt | sed '3r /dev/stdin' $lumpy_vcf > $out_dir/lumpy/samples_header.vcf
+awk '{printf "##contig=<ID=%s,length=%s>\n", $1, $2}' $ref.fai > $out_dir/lumpy/contigs.txt
+cat $out_dir/lumpy/contigs.txt | sed '3r /dev/stdin' $lumpy_vcf > $out_dir/lumpy/samples_header.vcf
 lumpy_vcf=$out_dir/lumpy/samples_header.vcf
 svtyper \
     -B $bams \
