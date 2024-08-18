@@ -21,6 +21,7 @@ conda activate $dnapipe_env_py2
 
 # 3. Pre-process
 while IFS=',' read -r name input1 input2 condition sex; do
+    echo "Preprocessing for LUMPY ..."
     bam=$out_dir/bam/$name.prcsd.bam
     samtools view -b -F 1294 -@ $threads $bam -o $out_dir/bam/$name.disc.bam
     samtools view -h -@ $threads $bam | \
@@ -81,6 +82,7 @@ else
 fi
 
 # 5. Genotype
+echo "Genotyping for LUMPY output ..."
 awk '{printf "##contig=<ID=%s,length=%s>\n", $1, $2}' $ref.fai > $out_dir/lumpy/contigs.txt
 cat $out_dir/lumpy/contigs.txt | sed '3r /dev/stdin' $lumpy_vcf > $out_dir/lumpy/samples_header.vcf
 lumpy_vcf=$out_dir/lumpy/samples_header.vcf
