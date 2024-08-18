@@ -114,8 +114,30 @@ Annotation: (default: options not enabled)
 ```
 
 #### dnapipe plot
-Used to plot additional statistics and analysis graphs from vcf files. 
+Used to plot additional statistics and analysis graphs from vcf files. Due to the differences between VCFs from different variant calling tools, plots including pathogenicity, GO, KEGG, and PPI analysis are limited to short variants annotated by VEP with pathogenicity annotations, and the CNV VCF used for circos is only supported by CNVkit output vcf.
+```
+usage:   dnapipe plot <input_options> <plot_types> [extra_options]
 
+Input options:
+        --snp           Provide SNP vcf.
+        --indel         Provide INDEL vcf.
+        --cnv           Provide CNV vcf.
+        --sv            Provide SV vcf.
+        -o/--outdir     Specify the output directory. (default: the current working directory)
+
+Plot types:
+        --category      Plot the category.
+        --length        Plot the length distribution.
+        --pathogenicity Plot the pathogenicity prediction.
+        --circos        Plot the Circos plot.
+        --go, --kegg, --ppi
+                        Plot the analysis result of GO/KEGG/PPI analysis.
+
+Additional Options:
+        --bin           Set the bin size for the Circos plot, in bp. (default: 5000000)
+        --cadd_score    Set the score threshold for CADD. (default: 10)
+        -h/--help       Show this help message and exit.
+```
 
 
 ### Graphical user interface
