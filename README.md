@@ -5,7 +5,7 @@ Streamlining human genome analysis and interpretation with an intuitive and user
 
 ## Table of Contents
 1. [Introduction](#Introduction)
-2. [Setup](#Serup)
+2. [Setup](#Setup)
 3. [Usage](#Usage)
 
    * [Command-Line](#Command-Line)
