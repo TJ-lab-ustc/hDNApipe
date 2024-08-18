@@ -37,7 +37,19 @@ bash download_annoatation.sh <out_dir>
 ```
 
 ## Usage
-  docker
+Use `docker run -v` to to map into the container the folder of our tool `hDNApipe`, annotation folders `AnnotSV_annotations` and `vep_annot`, and your sequencing data folder.
+```
+docker run \
+  -v /path/hDNApipe/:/hDNApipe \
+  -v /path/AnnotSV_annotations:/AnnotSV_annotations \
+  -v /path/vep_annot/:/vep_annot
+  -v /path/data:/input
+  -it hDNApipe /bin/bash
+```
+Additional settings should be added to run the GUI
+```
+--net=host -e DISPLAY=:10.0 -v /home/.Xauthority:/root/.Xauthority
+```
 
 ### Command-Line
 There are four components in hDNApipe.
@@ -155,9 +167,9 @@ Additional Options:
 ## Input
 The resources required for hDNApipe are declared in the config file, and the template is placed in [dnapipe.config]([url](https://github.com/TJ-lab-ustc/hDNApipe/blob/main/dnapipe.config)). If no modification of the docker container is made, the only change for the user is to complete three paths in the config: `dnapipe_dir`, `dir_vep_annot` and `annotsv_dir`. For example:
 ```
-dnapipe_dir="/opt/hDNApipe"                         # hDNApipe home directory
-dir_vep_annot="/opt/download/vep_annot"             # vep annotations home directory
-annotsv_dir="/opt/download/AnnotSV_annotations"     # AnnotSV annotations home directory
+dnapipe_dir="/hDNApipe"                # hDNApipe home directory
+dir_vep_annot="/vep_annot"             # vep annotations home directory
+annotsv_dir="/AnnotSV_annotations"     # AnnotSV annotations home directory
 ```
 
 The sample information table is required for `dnapipe var`. It should contain information including: sample name, path1, path2, condition and sex. The sample name and at least one input path are necessary. The sample name refers to the name used for adding the BAM read group and the prefix of most output files. The path is prepared for the sequencing file location.The condition is needed to make it clear which one is `tumor` and which one is `control` when running somatic analysis; otherwise, it is not needed. Sex is optional. Use ',' as seperator. For example, a full information table looks like:
