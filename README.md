@@ -18,9 +18,7 @@ Streamlining human genome analysis and interpretation with an intuitive and user
 
 
 ## Introduction
-
-
-
+hDNApipe is a highly flexible end-to-end pipeline designed for the analysis and interpretation of human genomic sequencing data. This tool is capable of detecting a wide range of variant types in both germline and somatic contexts, including single nucleotide variants (SNVs), small insertions and deletions (INDELs), large structural variants (SVs), and specifically copy number variations (CNVs). It has a dual-mode operation through both command-line and graphical user interface (GUI), ensuring an accessible user experience.
 
 ## Setup
 Due to the complexity of configuring the environment necessary for hDNApipe, as it involves numerous tools and dependencies, we have made hDNApipe into a Docker container image based on the Ubuntu operating system.
