@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-set -x
 
 # function: call germline or somatic CNV by CNVKIT
 # usuage: script_dir/cnvkit.sh $dect_mode $sample_table $out_dir $threads $bin_size $region $seq_mothod
