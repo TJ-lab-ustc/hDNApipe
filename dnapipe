@@ -627,7 +627,7 @@ other option:
         else
             while IFS=',' read -r name input1 input2 condition sex; do
                 echo "$out_dir/cnvkit/vcfs/${name}_cnvkit.vcf" >> $vcf_list
-            done
+            done < $sample_table
         fi
     fi
     
