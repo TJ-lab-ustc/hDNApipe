@@ -574,6 +574,9 @@ class visual_page(tk.Frame):
         def run_visual_shell():
             path = self.input["out_dir"] + "/visual.log"
             with open(path, "w") as log_file:
+                output_box.config(state="normal")
+                output_box.insert(tk.END, "Plotting..." + "\n")
+                output_box.config(state="disabled")
                 proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
                 while True:
                     output = proc.stdout.readline().decode().strip()
@@ -685,8 +688,8 @@ class App(tk.Tk):
         page_adv = advance_page(self.notebook)
         page_visual = visual_page(self.notebook)
         self.notebook.add(page_help, text="Initialization")
-        self.notebook.add(page_var, text="Basic option")
-        self.notebook.add(page_adv, text="Advance option")
+        self.notebook.add(page_var, text="Basic options")
+        self.notebook.add(page_adv, text="Advanced options")
         self.notebook.add(page_visual, text="VCF visulization")
         self.notebook.pack(expand=True, fill=tk.BOTH)
 
