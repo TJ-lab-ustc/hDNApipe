@@ -87,7 +87,6 @@ if [ $dect_mode == "somatic" ]; then
 # 2-2. germline
 else
     mkdir -p $out_dir/cnvkit/vcfs
-    mkdir -p $out_dir/cnvkit/call_cns
     mkdir -p $out_dir/cnvkit/plots
     while IFS=',' read -r name input1 input2 condition sex; do
         bam=$out_dir/bam/$name.prcsd.bam
@@ -121,5 +120,4 @@ else
         -o $out_dir/cnvkit/plots/samples_heatmap.pdf \
         $out_dir/cnvkit/else/*.prcsd.cns \
         -d
-    mv $out_dir/cnvkit/else/*.prcsd.call.cns $out_dir/cnvkit/call_cns/
 fi
