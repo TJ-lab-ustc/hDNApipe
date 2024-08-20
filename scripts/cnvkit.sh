@@ -116,8 +116,11 @@ else
             -s $out_dir/cnvkit/else/${name}.prcsd.cns \
             $out_dir/cnvkit/else/${name}.prcsd.cnr
     done < $sample_table
-    cnvkit.py heatmap \
-        -o $out_dir/cnvkit/plots/samples_heatmap.pdf \
-        $out_dir/cnvkit/else/*.prcsd.cns \
-        -d
+    sample_num=$( cat $sample_table |wc -l )
+    if [ $sample_num -gt 1 ]; then
+        cnvkit.py heatmap \
+            -o $out_dir/cnvkit/plots/samples_heatmap.pdf \
+            $out_dir/cnvkit/else/*.prcsd.cns \
+            -d
+    fi
 fi
