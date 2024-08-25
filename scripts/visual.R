@@ -102,8 +102,8 @@ if (category == "True" && SNP != 'NA') {
     # SNP classification
     snp$change_type1 <- NA
     snp$change_type2 <- 'Transversions'
-    snp[(snp$ref == 'A' & snp$alt == 'T')|(snp$ref == 'T' & snp$alt == 'A'),]$change_type2 <- 'Transitions'
-    snp[(snp$ref == 'C' & snp$alt == 'G')|(snp$ref == 'G' & snp$alt == 'C'),]$change_type2 <- 'Transitions'
+    snp[(snp$ref == 'A' & snp$alt == 'G')|(snp$ref == 'T' & snp$alt == 'C'),]$change_type2 <- 'Transitions'
+    snp[(snp$ref == 'C' & snp$alt == 'T')|(snp$ref == 'G' & snp$alt == 'A'),]$change_type2 <- 'Transitions'
     snp[(snp$ref == 'A' & snp$alt == 'T')|(snp$ref == 'T' & snp$alt == 'A'),]$change_type1 <- 'A>T|T>A'
     snp[(snp$ref == 'C' & snp$alt == 'G')|(snp$ref == 'G' & snp$alt == 'C'),]$change_type1 <- 'C>G|G>C'
     snp[(snp$ref == 'A' & snp$alt == 'C')|(snp$ref == 'T' & snp$alt == 'G'),]$change_type1 <- 'A>C|T>G'
