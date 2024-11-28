@@ -162,7 +162,10 @@ Additional Options:
 ```
 
 ### Graphical user interface
+Pop up the GUI window by entering the command 'python dnapipe.py', and subsequent operations do not require the command line. Its main interface is shown in the figure below：
+![image](https://github.com/user-attachments/assets/4f0769ca-bac1-4ca5-9f22-db1425c04738)
 
+Upon the initial usage, the reference genome can be configured via the "Reference" button located within the "Initialization" tab. Then, parameters can be set on the two options pages. The basic options page contains the essential parameters, while the advanced options page has the optional ones. The options in the GUI correspond to the arguments in the command-line. After completion, just click the RUN button to start the operation.
 
 ## Input
 The resources required for hDNApipe are declared in the config file, and the template is placed in [dnapipe.config]([url](https://github.com/TJ-lab-ustc/hDNApipe/blob/main/dnapipe.config)). If no modification of the docker container is made, the only change for the user is to complete three paths in the config: `dnapipe_dir`, `dir_vep_annot` and `annotsv_dir`. For example:
