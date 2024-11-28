@@ -185,8 +185,8 @@ sample,/path/sample.bam,,,
 
 
 ## Output
-
-
+The ultimate outputs consist of annotated variant call format files, visualization figures and reports. However, hDNApipe also saves intermediate files, which facilitates users to review and check. The structure of the output files is as follows:
+![image](https://github.com/user-attachments/assets/b376ee85-88bd-43a3-ad45-18f5fdb776c1)
 
 
 
