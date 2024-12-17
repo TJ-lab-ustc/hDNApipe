@@ -14,25 +14,29 @@ Streamlining human genome analysis and interpretation with an intuitive and user
    
 4. [Input](#Input)
 5. [Output](#Output)
-6. [Troubleshooting](#Troubleshooting)
+6. [Usage example and details](#Usage-example-and-details)
+7. [Troubleshooting](#Troubleshooting)
 
 
 ## Introduction
 hDNApipe is a highly flexible end-to-end pipeline designed for the analysis and interpretation of human genomic sequencing data. This tool is capable of detecting a wide range of variant types in both germline and somatic contexts, including single nucleotide variants (SNVs), small insertions and deletions (INDELs), large structural variants (SVs), and specifically copy number variations (CNVs). It has a dual-mode operation through both command-line and graphical user interface (GUI), ensuring an accessible user experience.
 
 ## Setup
-Due to the complexity of configuring the environment necessary for hDNApipe, as it involves numerous tools and dependencies, we have made hDNApipe into a Docker container image based on the Ubuntu operating system.The Dockerfile will release soon.
+Given the intricate nature of setting up the environment required for hDNApipe, which entails a multitude of tools and dependencies, we have encapsulated hDNApipe into a Docker container image predicated on the Ubuntu operating system. The corresponding Dockerfile will be made available soon.
 
-First, use git to download the latest development tree. 
-Then, the annotation files should be downloaded separately as they are not included in the Docker image due to their large size, which totals approximately 47GB. It is recommended to run the bash script used to download the annotation files in a tmux window or a similar manner, as it may take a considerable amount of time to complete. Moreover, it is suggested to download in the main computer and bind mount a volume instead of downloading in the docker container.
-
-This download step can be skipped if annoation function is not needed.
+First, utilize the git command to retrieve the most recent development tree. 
 ```
 git clone https://github.com/TJ-lab-ustc/hDNApipe
 cd hDNApipe
 chmod +x ./dnapipe
+```
+
+Subsequently, obtain the files associated with the annotation function. This download step can be skipped if annotation function is not needed.
+It should be noted that the annotation files, amounting to approximately 47GB in total, are not incorporated within the Docker image due to their substantial size. Hence, they need to be downloaded independently. It is advisable to execute the bash script designed for downloading these annotation files within a **tmux** window or an analogous environment, considering that the download process might consume a significant amount of time. Furthermore, it is recommended to conduct the download on the host machine and then mount a volume, as opposed to downloading directly within the docker container. 
+```
 bash download_annoatation.sh <out_dir>
 ```
+
 
 ## Usage
 Use `docker run -v` to to map into the container the folder of our tool `hDNApipe`, annotation folders `AnnotSV_annotations` and `vep_annot`, and your sequencing data folder.
@@ -43,49 +47,40 @@ docker run \
   -v /path/vep_annot/:/vep_annot \
   -v /path/data:/input \
   -it hDNApipe /bin/bash
+待改
 ```
-Additional settings are required to make the remote GUI accessible:
+When aiming to enable access to the remote GUI, certain crucial additional settings need to be configured:
 ```
 --net=host -e DISPLAY=:10.0 -v /$HOME/.Xauthority:/root/.Xauthority
 ```
+The ```--net=host``` option allows the container to share the host's network namespace, which is essential for proper communication and access to the GUI. The ```-e DISPLAY=:10.0``` environment variable setting specifies the display server to which the GUI applications will connect. This ensures that the graphical output is directed to the correct display. The ```-v /$HOME/.Xauthority:/root/.Xauthority``` volume mount is used to share the X authority file between the host and the container, which is necessary to authenticate and authorize the container to access the host's X server, enabling a seamless and secure GUI experience when working with remote systems or containers.
 
 ### Command-Line
-There are four components in hDNApipe.
+There are three core components in hDNApipe.
 
-1. [dnapipe init](#dnapipe-init) for the first time downloading.
+1. [dnapipe ref](#dnapipe-ref) for setting reference genome.
 
-2. [dnapipe ref](#dnapipe-ref) for setting reference genome.
+2. [dnapipe var](#dnapipe-var) for genomic analysis pipeline.
 
-3. [dnapipe var](#dnapipe-var) for genomic analysis pipeline.
+3. [dnapipe plot](#dnapipe-plot) for plotting.
 
-4. [dnapipe plot](#dnapipe-plot) for plotting.
-
-#### dnapipe init
-This is used for downloading necessary resource files when installing hDNApipe for the first time. However, they have already been downloaded in the docker image. There is no necessity to utilize this, but we retained this function just in case.
-
-Download files used in variant calling: 
-```
-dnapipe init --var [-o output_dir]
-```
-Download files used in annotations, which may take lots of time:
-```
-dnapipe init --annot [-o output_dir]
-```
 
 #### dnapipe ref
-This is utilized for setting the reference genome. Two modes are provided. One is downloading the recommended reference online and indexing it; another one is choosing from an existing fasta file and indexing it if no related files are found in its directory. In fact, the recommended reference is also included in the docker image.
+This functionality is designed to configure the reference genome, with two available modes. The first mode entails downloading the recommended reference from the online repository and subsequently generating an index for it. The second mode involves selecting from an existing fasta file; if no relevant index files are detected within its directory, an indexing process will be initiated. 
+We recommend using the recommended reference genome to circumvent the issue of incompatibility with certain individual tools. Notably, the recommended reference genome is already part of the docker image, so actually there's no need to download it under normal circumstances.
 
-To download the recommended hg38 reference online:
-```
-dnapipe ref --download <save_dir>
-```
 To set an existing file as the reference:
 ```
 dnapipe ref --set <ref.fa>
 ```
+To download the recommended hg38 reference online:
+```
+dnapipe ref --download <save_dir>
+```
+
 
 #### dnapipe var
-The main module in hDNApipe. It is used to run the genomic analysis pipeline, including alignment, preprocessing, variant calling, and annotation.
+This is the main module in hDNApipe. It is used to run the genomic analysis pipeline, including alignment, preprocessing, variant calling, and annotation.
 ```
 usage:   dnapipe var <core_options> [extra_options]
 ```
@@ -120,7 +115,7 @@ Variants calling:
         --bin     INT       CNV calling bin size in bp (default: 10000)
 
 Annotation: (default: options not enabled)
-        --annot             Use VEP to annotate SNP/INDEL vcf with default information and AnnotSV for SV/CNV                                                 )
+        --annot             Use VEP to annotate SNP/INDEL vcf with default information and AnnotSV for SV/CNV                                           
     More VEP annotation information can be added:
         --symbol            Add Gene Symbol information.
         --exist             Check the existence of each variant.
@@ -165,12 +160,15 @@ Pop up the GUI window by entering the command 'python dnapipe.py', and subsequen
 
 Upon the initial usage, the reference genome can be configured via the "Reference" button located within the "Initialization" tab. Then, parameters can be set on the two options pages. The basic options page contains the essential parameters, while the advanced options page has the optional ones. The options in the GUI correspond to the arguments in the command-line. After completion, just click the RUN button to start the operation.
 
+Details on usage and examples can be found in the document 待加.
+
 ## Input
 The resources required for hDNApipe are declared in the config file, and the template is placed in [dnapipe.config]([url](https://github.com/TJ-lab-ustc/hDNApipe/blob/main/dnapipe.config)). If no modification of the docker container is made, the only change for the user is to complete three paths in the config: `dnapipe_dir`, `dir_vep_annot` and `annotsv_dir`. For example:
 ```
 dnapipe_dir="/hDNApipe"                # hDNApipe home directory
 dir_vep_annot="/vep_annot"             # vep annotations home directory
 annotsv_dir="/AnnotSV_annotations"     # AnnotSV annotations home directory
+待改
 ```
 
 The sample information table is required for `dnapipe var`. It should contain information including: sample name, path1, path2, condition and sex. The sample name and at least one input path are necessary. The sample name refers to the name used for adding the BAM read group and the prefix of most output files. The path is prepared for the sequencing file location.The condition is needed to make it clear which one is `tumor` and which one is `control` when running somatic analysis; otherwise, it is not needed. Sex is optional. Use ',' as seperator. For example, a full information table looks like:
@@ -189,6 +187,7 @@ sample,/path/sample.bam,,,
 The ultimate outputs consist of annotated variant call format files, visualization figures and reports. However, hDNApipe also saves intermediate files, which facilitates users to review and check. The structure of the output files is as follows:
 ![image](https://github.com/user-attachments/assets/b376ee85-88bd-43a3-ad45-18f5fdb776c1)
 
+## Usage example and details 
 
 
 # Troubleshooting
