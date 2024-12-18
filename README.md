@@ -1,5 +1,5 @@
 # hDNApipe
-Streamlining human genome analysis and interpretation with an intuitive and user-friendly pipeline
+Streamlining human genome analysis and interpretation with an intuitive and user-friendly pipeline.
 
 <img src="https://github.com/user-attachments/assets/1816e1c0-dcbb-4df2-b660-bfdb43ebe002" width="700px">
 
@@ -151,7 +151,7 @@ For example, modify the number of threads by adding the ```-t``` parameter, and 
   	-i /input/sample.txt \
   	--variant short,sv \
   	-o /output_dir \
-  	-t 20 -short deepvariant
+  	-t 20 --short deepvariant
 ```
 
 #### dnapipe plot
