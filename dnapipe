@@ -152,11 +152,12 @@ usage:
     while true; do
         case "$1" in
             --set)
-                ref_path=$2
+                ref_path=$(readlink -f $2)
                 shift 2
             ;;
             --download)
-                download_dir=$2
+                download_dir=$(readlink -f $2)
+                download_flag=True
                 shift 2
             ;;
             --help|-h)
@@ -169,23 +170,22 @@ usage:
         esac
     done
 
-    ref_path=$(readlink -f $ref_path)
-    download_dir=$(readlink -f $download_dir)
-
     # download hg38 if choose "download"
-    if [ -d "$download_dir" ] ; then
-        echo "**********Downloading hg38 reference...**********"
-        mkdir -p $download_dir/reference
-        hg38_dir=ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.15_GRCh38/seqs_for_alignment_pipelines.ucsc_ids
-        curl $hg38_dir/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.gz | \
-            gunzip > $download_dir/reference/GRCh38_no_alt_analysis_set.fna
-        curl $hg38_dir/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai \
-            > $download_dir/reference/GRCh38_no_alt_analysis_set.fna.fai
-        ref_path=$download_dir/reference/GRCh38_no_alt_analysis_set.fna
-        echo "**********Download Done**********"
-    else
-        echo "Error: Invalid directory."
-        exit 1
+    if [ "$download_flag" == True ]; then
+        if [ -d "$download_dir" ] ; then
+            echo "**********Downloading hg38 reference...**********"
+            mkdir -p $download_dir/reference
+            hg38_dir=ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.15_GRCh38/seqs_for_alignment_pipelines.ucsc_ids
+            curl $hg38_dir/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.gz | \
+                gunzip > $download_dir/reference/GRCh38_no_alt_analysis_set.fna
+            curl $hg38_dir/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai \
+                > $download_dir/reference/GRCh38_no_alt_analysis_set.fna.fai
+            ref_path=$download_dir/reference/GRCh38_no_alt_analysis_set.fna
+            echo "**********Download Done**********"
+        else
+            echo "Error: Invalid directory."
+            exit 1
+        fi
     fi
 
     # write reference path into config file in both options
