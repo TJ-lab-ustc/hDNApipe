@@ -36,19 +36,21 @@ It should be noted that the annotation files, amounting to approximately 47GB in
 ```
 bash download_annoatation.sh <out_dir>
 ```
-
+Specify the location where the annotation information will be downloaded in ```<out_dir>```.
 
 ## Usage
-Use `docker run -v` to to map into the container the folder of our tool `hDNApipe`, annotation folders `AnnotSV_annotations` and `vep_annot`, and your sequencing data folder.
+Use `docker run -v` to to map into the container the folder of our tool `hDNApipe`, annotation folders `AnnotSV_annotations` and `vep_annot`, and your sequencing data folder.  
 ```
 docker run \
-  -v /path/hDNApipe/:/hDNApipe \
-  -v /path/AnnotSV_annotations:/AnnotSV_annotations \
-  -v /path/vep_annot/:/vep_annot \
+  -v /path/hDNApipe:/hDNApipe \
+  -v /path/annotation_dir:/annotation_dir \
   -v /path/data:/input \
   -it hDNApipe /bin/bash
-待改
 ```
+When running, change ```/path/hDNApipe/``` to the folder path of the hDNApipe downloaded via Git. Change ```/path/annotation_dir/``` to the folder path specified when downloading the annotation files. And ```/path/data```` should be set as the folder path where the sequencing files are located. 
+
+*The `-v` option in the command is used for volume mounting. It allows you to map directories from your local machine to directories inside the Docker container. The part before the colon (:) refers to a directory path on your local machine, and the part after the colon indicates the corresponding directory path inside the Docker container. 
+
 When aiming to enable access to the remote GUI, certain crucial additional settings need to be configured:
 ```
 --net=host -e DISPLAY=:10.0 -v /$HOME/.Xauthority:/root/.Xauthority
@@ -56,14 +58,13 @@ When aiming to enable access to the remote GUI, certain crucial additional setti
 The ```--net=host``` option allows the container to share the host's network namespace, which is essential for proper communication and access to the GUI. The ```-e DISPLAY=:10.0``` environment variable setting specifies the display server to which the GUI applications will connect. This ensures that the graphical output is directed to the correct display. The ```-v /$HOME/.Xauthority:/root/.Xauthority``` volume mount is used to share the X authority file between the host and the container, which is necessary to authenticate and authorize the container to access the host's X server, enabling a seamless and secure GUI experience when working with remote systems or containers.
 
 ### Command-Line
-There are three core components in hDNApipe.
+There are three main subcommands in hDNApipe.
 
 1. [dnapipe ref](#dnapipe-ref) for setting reference genome.
 
 2. [dnapipe var](#dnapipe-var) for genomic analysis pipeline.
 
 3. [dnapipe plot](#dnapipe-plot) for plotting.
-
 
 #### dnapipe ref
 This functionality is designed to configure the reference genome, with two available modes. The first mode entails downloading the recommended reference from the online repository and subsequently generating an index for it. The second mode involves selecting from an existing fasta file; if no relevant index files are detected within its directory, an indexing process will be initiated. 
@@ -73,10 +74,13 @@ To set an existing file as the reference:
 ```
 dnapipe ref --set <ref.fa>
 ```
+```<ref.fa>```is used to specify the reference genome FASTA file.
+
 To download the recommended hg38 reference online:
 ```
 dnapipe ref --download <save_dir>
 ```
+```<save_dir>```is used to specify the path when downloading the reference genome
 
 
 #### dnapipe var
