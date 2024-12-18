@@ -57,6 +57,8 @@ When aiming to enable access to the remote GUI, certain crucial additional setti
 ```
 The ```--net=host``` option allows the container to share the host's network namespace, which is essential for proper communication and access to the GUI. The ```-e DISPLAY=:10.0``` environment variable setting specifies the display server to which the GUI applications will connect. This ensures that the graphical output is directed to the correct display. The ```-v /$HOME/.Xauthority:/root/.Xauthority``` volume mount is used to share the X authority file between the host and the container, which is necessary to authenticate and authorize the container to access the host's X server, enabling a seamless and secure GUI experience when working with remote systems or containers.
 
+After entering Docker, operations can be divided into two forms: command line and graphical user interface.
+
 ### Command-Line
 There are three main subcommands in hDNApipe.
 
@@ -99,6 +101,16 @@ Core options:
         --sample-info/-i    Provide sample informtion table.
         --region/-r         Region to detect variants on. Bed file. Only necessary for wes/target data.
 ```
+For example, run the following code to perform germline detection on WES fastq data, and the mutation types to be detected are specified as short variants (SNV and INDEL) and SV. All the results will be placed into the ```/output_dir```.
+```
+./dnapipe var \
+  	--mode germline --file-type fastq --seq-method wes \
+  	--region /input/idt_capture_novogene_no_alt.bed \
+  	-i /input/sample.txt \
+  	--variant short,sv \
+  	-o /output_dir
+```
+
 And there are more parameters for advanced users to customize: 
 ```
 Computing options:
@@ -131,14 +143,24 @@ Annotation: (default: options not enabled)
     Else:
         --annot-all         Use all the above options in annotation.
 ```
+For example, modify the number of threads by adding the ```-t``` parameter, and ```--short``` can be used to specify the caller for detecting short variants:
+```
+./dnapipe var \
+  	--mode germline --file-type fastq --seq-method wes \
+  	--region /input/idt_capture_novogene_no_alt.bed \
+  	-i /input/sample.txt \
+  	--variant short,sv \
+  	-o /output_dir \
+    -t 20 -short deepvariant
+```
 
 #### dnapipe plot
-Used to plot additional statistics and analysis graphs from vcf files. Due to the differences between VCFs from different variant calling tools, plots including pathogenicity, GO, KEGG, and PPI analysis are limited to short variants annotated by VEP with pathogenicity annotations, and the CNV VCF used for circos is only supported by CNVkit output vcf.
+Used to plot additional statistics and analysis graphs from vcf files. Due to the differences between VCFs from different variant calling tools, plots including pathogenicity, GO, KEGG, and PPI analysis are limited to short variants annotated by VEP with pathogenicity annotations, and the CNV VCF used for circos is only supported by CNVkit output vcf. There is an expectation for the expansion of its compatibility down the road.
 ```
 usage:   dnapipe plot <input_options> <plot_types> [extra_options]
 
 Input options:
-        --snp           Provide SNP vcf.
+        --snp           Provide SNV vcf.
         --indel         Provide INDEL vcf.
         --cnv           Provide CNV vcf.
         --sv            Provide SV vcf.
@@ -157,6 +179,8 @@ Additional Options:
         --cadd_score    Set the score threshold for CADD. (default: 10)
         -h/--help       Show this help message and exit.
 ```
+For example, the following can be used to plot the classification information of SNV.
+```dnapipe plot --snp /path/snv.vcf --category -o /path/outdir```
 
 ### Graphical user interface
 Pop up the GUI window by entering the command 'python dnapipe.py', and subsequent operations do not require the command line. Its main interface is shown in the figure below：
@@ -167,13 +191,12 @@ Upon the initial usage, the reference genome can be configured via the "Referenc
 Details on usage and examples can be found in the document 待加.
 
 ## Input
-The resources required for hDNApipe are declared in the config file, and the template is placed in [dnapipe.config]([url](https://github.com/TJ-lab-ustc/hDNApipe/blob/main/dnapipe.config)). If no modification of the docker container is made, the only change for the user is to complete three paths in the config: `dnapipe_dir`, `dir_vep_annot` and `annotsv_dir`. For example:
+The resources required for hDNApipe are declared in the config file, and the template is placed in [dnapipe.config]([url](https://github.com/TJ-lab-ustc/hDNApipe/blob/main/dnapipe.config)). If no modification of the docker container is made, the only change for the user is to complete two paths in the config: `dnapipe_dir`, `dir_vep_annot` and `annotsv_dir`. For example:
 ```
 dnapipe_dir="/hDNApipe"                # hDNApipe home directory
-dir_vep_annot="/vep_annot"             # vep annotations home directory
-annotsv_dir="/AnnotSV_annotations"     # AnnotSV annotations home directory
-待改
+annotation_dir="/annotation_dir"       # annotation files download directory
 ```
+Note that both of these require the location within the Docker container, that is, the location after the colon when running the ```docker -v``` command. 
 
 The sample information table is required for `dnapipe var`. It should contain information including: sample name, path1, path2, condition and sex. The sample name and at least one input path are necessary. The sample name refers to the name used for adding the BAM read group and the prefix of most output files. The path is prepared for the sequencing file location.The condition is needed to make it clear which one is `tumor` and which one is `control` when running somatic analysis; otherwise, it is not needed. Sex is optional. Use ',' as seperator. For example, a full information table looks like:
 ```
@@ -184,7 +207,6 @@ If there is some unnecessary information missing, do it like:
 ```
 sample,/path/sample.bam,,,
 ```
-
 
 
 ## Output
