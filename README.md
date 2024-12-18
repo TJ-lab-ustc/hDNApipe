@@ -151,7 +151,7 @@ For example, modify the number of threads by adding the ```-t``` parameter, and 
   	-i /input/sample.txt \
   	--variant short,sv \
   	-o /output_dir \
-    -t 20 -short deepvariant
+  	-t 20 -short deepvariant
 ```
 
 #### dnapipe plot
@@ -180,6 +180,7 @@ Additional Options:
         -h/--help       Show this help message and exit.
 ```
 For example, the following can be used to plot the classification information of SNV.
+
 ```dnapipe plot --snp /path/snv.vcf --category -o /path/outdir```
 
 ### Graphical user interface
@@ -214,7 +215,7 @@ The ultimate outputs consist of annotated variant call format files, visualizati
 ![image](https://github.com/user-attachments/assets/b376ee85-88bd-43a3-ad45-18f5fdb776c1)
 
 ## Usage example and details 
-For practical operation examples, please refer to the [manual instruction](https://github.com/TJ-lab-ustc/hDNApipe/blob/main/manual.pdf)
+For practical operation examples, please refer to the [manual instruction](https://github.com/TJ-lab-ustc/hDNApipe/blob/main/manual.pdf).
 
 # Troubleshooting
 If you encounter errors from hDNApipe, please report them on the [issues](https://github.com/TJ-lab-ustc/hDNApipe/issues) page. Any bug reports, suggestions and general feedback would be highly welcome.
