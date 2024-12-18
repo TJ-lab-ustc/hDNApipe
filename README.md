@@ -202,7 +202,7 @@ Note that both of these require the location within the Docker container, that i
 The sample information table is required for `dnapipe var`. It should contain information including: sample name, path1, path2, condition and sex. The sample name and at least one input path are necessary. The sample name refers to the name used for adding the BAM read group and the prefix of most output files. The path is prepared for the sequencing file location.The condition is needed to make it clear which one is `tumor` and which one is `control` when running somatic analysis; otherwise, it is not needed. Sex is optional. Use ',' as seperator. For example, a full information table looks like:
 ```
 sample1,/path/sample1_1.fastq.gz,/path/sample1_2.fastq.gz,tumor,male
-sample2,/path/sample2_1.fastq.gz,/path/sample2_2.fastq.gz,normal,male
+sample2,/path/sample2_1.fastq.gz,/path/sample2_2.fastq.gz,control,male
 ```
 If there is some unnecessary information missing, do it like: 
 ```
