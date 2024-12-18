@@ -188,7 +188,7 @@ Pop up the GUI window by entering the command 'python dnapipe.py', and subsequen
 
 Upon the initial usage, the reference genome can be configured via the "Reference" button located within the "Initialization" tab. Then, parameters can be set on the two options pages. The basic options page contains the essential parameters, while the advanced options page has the optional ones. The options in the GUI correspond to the arguments in the command-line. After completion, just click the RUN button to start the operation.
 
-Details on usage and examples can be found in the document 待加.
+Details on usage and examples can be found in the [manual instruction](https://github.com/TJ-lab-ustc/hDNApipe/blob/main/manual.pdf).
 
 ## Input
 The resources required for hDNApipe are declared in the config file, and the template is placed in [dnapipe.config]([url](https://github.com/TJ-lab-ustc/hDNApipe/blob/main/dnapipe.config)). If no modification of the docker container is made, the only change for the user is to complete two paths in the config: `dnapipe_dir`, `dir_vep_annot` and `annotsv_dir`. For example:
@@ -214,7 +214,7 @@ The ultimate outputs consist of annotated variant call format files, visualizati
 ![image](https://github.com/user-attachments/assets/b376ee85-88bd-43a3-ad45-18f5fdb776c1)
 
 ## Usage example and details 
-
+For practical operation examples, please refer to the [manual instruction](https://github.com/TJ-lab-ustc/hDNApipe/blob/main/manual.pdf)
 
 # Troubleshooting
 If you encounter errors from hDNApipe, please report them on the [issues](https://github.com/TJ-lab-ustc/hDNApipe/issues) page. Any bug reports, suggestions and general feedback would be highly welcome.
