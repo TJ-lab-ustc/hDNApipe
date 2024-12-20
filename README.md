@@ -24,11 +24,12 @@ hDNApipe is a highly flexible end-to-end pipeline designed for the analysis and 
 ## Setup
 Given the intricate nature of setting up the environment required for hDNApipe, which entails a multitude of tools and dependencies, we have encapsulated hDNApipe into a Docker container image predicated on the Ubuntu operating system. The corresponding Dockerfile will be made available soon.
 
-First, utilize the git command to retrieve the most recent development tree. 
+First, utilize the git command to retrieve the most recent development tree and build Docker image from Dockerfile. 
 ```
 git clone https://github.com/TJ-lab-ustc/hDNApipe
 cd hDNApipe
 chmod +x ./dnapipe
+docker build -t hDNApipe:v1.0 -f Dockerfile
 ```
 
 Subsequently, obtain the files associated with the annotation function. This download step can be skipped if annotation function is not needed.
