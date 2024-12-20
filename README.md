@@ -41,7 +41,7 @@ bash download_annoatation.sh <out_dir>
 Specify the location where the annotation information will be downloaded in ```<out_dir>```.
 
 ## Usage
-Use `docker run -v` to to map into the container the folder of our tool `hDNApipe`, annotation files folder, and your sequencing data folder.  
+Use `docker run -v` to to map into the container the folder of our tool hDNApipe, annotation files folder, and your sequencing data folder.  
 ```
 docker run \
   -v /path/hDNApipe:/hDNApipe \
