@@ -32,6 +32,7 @@ chmod +x ./dnapipe
 ```
 
 Subsequently, obtain the files associated with the annotation function. This download step can be skipped if annotation function is not needed.
+
 It should be noted that the annotation files, amounting to approximately 47GB in total, are not incorporated within the Docker image due to their substantial size. Hence, they need to be downloaded independently. It is advisable to execute the bash script designed for downloading these annotation files within a **tmux** window or an analogous environment, considering that the download process might consume a significant amount of time. Furthermore, it is recommended to conduct the download on the host machine and then mount a volume, as opposed to downloading directly within the docker container. 
 ```
 bash download_annoatation.sh <out_dir>
@@ -39,7 +40,7 @@ bash download_annoatation.sh <out_dir>
 Specify the location where the annotation information will be downloaded in ```<out_dir>```.
 
 ## Usage
-Use `docker run -v` to to map into the container the folder of our tool `hDNApipe`, annotation folders `AnnotSV_annotations` and `vep_annot`, and your sequencing data folder.  
+Use `docker run -v` to to map into the container the folder of our tool `hDNApipe`, annotation files folder, and your sequencing data folder.  
 ```
 docker run \
   -v /path/hDNApipe:/hDNApipe \
@@ -47,8 +48,7 @@ docker run \
   -v /path/data:/input \
   -it hDNApipe /bin/bash
 ```
-When running, change ```/path/hDNApipe/``` to the folder path of the hDNApipe downloaded via Git. Change ```/path/annotation_dir/``` to the folder path specified when downloading the annotation files. And ```/path/data```` should be set as the folder path where the sequencing files are located. 
-
+When running, change ```/path/hDNApipe/``` to the folder path of the hDNApipe downloaded via Git. Change ```/path/annotation_dir/``` to the folder path specified when downloading the annotation files. And ```/path/data``` should be set as the folder path which contains all the sequencing files.
 *The `-v` option in the command is used for volume mounting. It allows you to map directories from your local machine to directories inside the Docker container. The part before the colon (:) refers to a directory path on your local machine, and the part after the colon indicates the corresponding directory path inside the Docker container. 
 
 When aiming to enable access to the remote GUI, certain crucial additional settings need to be configured:
@@ -183,13 +183,17 @@ For example, the following can be used to plot the classification information of
 
 ```dnapipe plot --snp /path/snv.vcf --category -o /path/outdir```
 
+Here are some example plots for the visualization function:
+![image](https://github.com/user-attachments/assets/32085cf6-2edb-45c7-8f3e-edcd05de0084)
+
+
 ### Graphical user interface
 Pop up the GUI window by entering the command 'python dnapipe.py', and subsequent operations do not require the command line. Its main interface is shown in the figure below：
 ![image](https://github.com/user-attachments/assets/4f0769ca-bac1-4ca5-9f22-db1425c04738)
 
 Upon the initial usage, the reference genome can be configured via the "Reference" button located within the "Initialization" tab. Then, parameters can be set on the two options pages. The basic options page contains the essential parameters, while the advanced options page has the optional ones. The options in the GUI correspond to the arguments in the command-line. After completion, just click the RUN button to start the operation.
 
-Details on usage and examples can be found in the [manual instruction](https://github.com/TJ-lab-ustc/hDNApipe/blob/main/manual.pdf).
+Details on GUI usage and examples can be found in the [manual instruction](https://github.com/TJ-lab-ustc/hDNApipe/blob/main/manual.pdf).
 
 ## Input
 The resources required for hDNApipe are declared in the config file, and the template is placed in [dnapipe.config]([url](https://github.com/TJ-lab-ustc/hDNApipe/blob/main/dnapipe.config)). If no modification of the docker container is made, the only change for the user is to complete two paths in the config: `dnapipe_dir`, `dir_vep_annot` and `annotsv_dir`. For example:
