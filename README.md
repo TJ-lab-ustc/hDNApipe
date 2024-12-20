@@ -184,9 +184,6 @@ For example, the following can be used to plot the classification information of
 
 ```dnapipe plot --snp /path/snv.vcf --category -o /path/outdir```
 
-Here are some example plots for the visualization function:
-![image](https://github.com/user-attachments/assets/32085cf6-2edb-45c7-8f3e-edcd05de0084)
-
 
 ### Graphical user interface
 Pop up the GUI window by entering the command 'python dnapipe.py', and subsequent operations do not require the command line. Its main interface is shown in the figure below：
@@ -218,6 +215,10 @@ sample,/path/sample.bam,,,
 ## Output
 The ultimate outputs consist of annotated variant call format files, visualization figures and reports. However, hDNApipe also saves intermediate files, which facilitates users to review and check. The structure of the output files is as follows:
 ![image](https://github.com/user-attachments/assets/b376ee85-88bd-43a3-ad45-18f5fdb776c1)
+
+Visualization serves as an extra functionality, and consequently, the resultant data is saved within the folder designated by the user during this particular step. Here are some example output plots for the visualization function:
+![image](https://github.com/user-attachments/assets/32085cf6-2edb-45c7-8f3e-edcd05de0084)
+
 
 ## Usage example and details 
 For practical operation examples, please refer to the [manual instruction](https://github.com/TJ-lab-ustc/hDNApipe/blob/main/manual.pdf).
